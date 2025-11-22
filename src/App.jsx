@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
@@ -59,8 +59,33 @@ function App() {
   const [markdown, setMarkdown] = useState(defaultMarkdown);
   const [columns, setColumns] = useState(4);
   const [fontSize, setFontSize] = useState(8);
+  const [padding, setPadding] = useState(15); // mm
+  const [gap, setGap] = useState(8); // mm
+  const [scale, setScale] = useState(1);
   const [splitSize, setSplitSize] = useState(50);
   const previewRef = useRef(null);
+  const previewContainerRef = useRef(null);
+
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY * -0.001;
+        setScale(prev => Math.min(Math.max(prev + delta, 0.5), 3));
+      }
+    };
+
+    const container = previewContainerRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false });
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, []);
 
   return (
     <div className="app">
@@ -69,6 +94,12 @@ function App() {
         setColumns={setColumns}
         fontSize={fontSize}
         setFontSize={setFontSize}
+        padding={padding}
+        setPadding={setPadding}
+        gap={gap}
+        setGap={setGap}
+        scale={scale}
+        setScale={setScale}
         previewRef={previewRef}
       />
       <div className="main-content">
@@ -99,12 +130,19 @@ function App() {
         >
           <div className="resize-handle-bar"></div>
         </div>
-        <div className="preview-panel" style={{ width: `${100 - splitSize}%` }}>
+        <div
+          className="preview-panel"
+          style={{ width: `${100 - splitSize}%` }}
+          ref={previewContainerRef}
+        >
           <Preview
             ref={previewRef}
             markdown={markdown}
             columns={columns}
             fontSize={fontSize}
+            padding={padding}
+            gap={gap}
+            scale={scale}
           />
         </div>
       </div>
