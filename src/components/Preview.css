@@ -239,14 +239,74 @@
 }
 
 /* Print optimization */
+/* Print optimization */
 @media print {
-    .preview-content {
-        padding: 0;
-        background: white;
+    @page {
+        size: A4 landscape;
+        margin: 0;
     }
 
-    .preview-page {
-        box-shadow: none;
+    body {
         margin: 0;
+        padding: 0;
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Hide everything by default */
+    body>* {
+        display: none !important;
+    }
+
+    /* Only show the app root and necessary structure */
+    #root,
+    .app,
+    .main-content,
+    .preview-panel,
+    .preview,
+    .preview-content,
+    .preview-scaler {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        position: static !important;
+        background: white !important;
+    }
+
+    /* Specifically hide UI components */
+    .toolbar,
+    .editor-panel,
+    .resize-handle,
+    .preview-header,
+    .md-measurer {
+        display: none !important;
+    }
+
+    /* Reset zoom/scaling for print */
+    .preview-scaler {
+        zoom: 1 !important;
+        transform: none !important;
+    }
+
+    /* Page styling */
+    .preview-page {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        page-break-after: always;
+        break-after: page;
+        overflow: hidden;
+        /* Ensure content doesn't spill over in print view */
+        print-color-adjust: exact;
+    }
+
+    .preview-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
     }
 }

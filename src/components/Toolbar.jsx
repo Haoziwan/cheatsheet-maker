@@ -1,6 +1,4 @@
 import { Download, Github, Settings, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import './Toolbar.css';
 
 function Toolbar({
@@ -11,54 +9,11 @@ function Toolbar({
     scale, setScale,
     previewRef
 }) {
-    const handleExportPDF = async () => {
-        if (!previewRef.current) return;
-
-        try {
-            const pagesContainer = previewRef.current;
-            const scalerElement = pagesContainer.parentElement;
-
-            // 保存当前的zoom值并临时移除
-            const originalZoom = scalerElement.style.zoom;
-            scalerElement.style.zoom = '1';
-
-            // 等待浏览器重新渲染
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // Collect page elements
-            const pageElements = pagesContainer.querySelectorAll('.preview-page');
-
-            // Create PDF (landscape)
-            const pdf = new jsPDF('l', 'mm', 'a4');
-
-            // Render each page to canvas and add to PDF
-            for (let i = 0; i < pageElements.length; i++) {
-                const pageEl = pageElements[i];
-                const canvas = await html2canvas(pageEl, {
-                    scale: 4,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                    windowWidth: pageEl.scrollWidth,
-                    windowHeight: pageEl.scrollHeight
-                });
-
-                const imgWidthMM = 297;
-                const imgHeightMM = 210;
-                const imgData = canvas.toDataURL('image/png');
-
-                if (i > 0) pdf.addPage('a4', 'l');
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM);
-            }
-
-            // 恢复原来的zoom值
-            scalerElement.style.zoom = originalZoom;
-
-            pdf.save('cheatsheet.pdf');
-        } catch (error) {
-            console.error('Error generating PDF:', error);
-            alert('Failed to generate PDF. Please try again.');
-        }
+    const handleExportPDF = () => {
+        // Trigger browser print dialog
+        // The @media print styles in Preview.css will handle the layout
+        // to ensure only the preview pages are printed in A4 landscape
+        window.print();
     };
 
     return (
