@@ -1,0 +1,236 @@
+.preview {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-bg-primary);
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.preview-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.preview-info {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-family-mono);
+}
+
+.preview-content {
+    flex: 1;
+    overflow: auto;
+    padding: var(--spacing-xl);
+    background: #4a4a4a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.preview-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    padding: 15mm;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    color: #000;
+    column-gap: 8mm;
+    column-rule: 1px solid #ddd;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.4;
+}
+
+/* Markdown Styles */
+.preview-page .md-h1 {
+    font-size: 1.8em;
+    font-weight: 700;
+    margin: 0.5em 0 0.3em 0;
+    color: #1a1a1a;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.2em;
+    break-after: avoid;
+}
+
+.preview-page .md-h2 {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin: 0.4em 0 0.25em 0;
+    color: #2a2a2a;
+    border-bottom: 1px solid #666;
+    padding-bottom: 0.15em;
+    break-after: avoid;
+}
+
+.preview-page .md-h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 0.3em 0 0.2em 0;
+    color: #333;
+    break-after: avoid;
+}
+
+.preview-page .md-h4 {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 0.25em 0 0.15em 0;
+    color: #444;
+    break-after: avoid;
+}
+
+.preview-page .md-h5,
+.preview-page .md-h6 {
+    font-size: 1em;
+    font-weight: 600;
+    margin: 0.2em 0 0.1em 0;
+    color: #555;
+    break-after: avoid;
+}
+
+.preview-page .md-p {
+    margin: 0.3em 0;
+    text-align: justify;
+    hyphens: auto;
+}
+
+.preview-page .md-ul,
+.preview-page .md-ol {
+    margin: 0.3em 0;
+    padding-left: 1.5em;
+}
+
+.preview-page .md-li {
+    margin: 0.1em 0;
+}
+
+.preview-page .md-code-inline {
+    background: #f0f0f0;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+    border: 1px solid #e0e0e0;
+}
+
+.preview-page .md-pre {
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5em;
+    margin: 0.4em 0;
+    overflow-x: auto;
+    break-inside: avoid;
+}
+
+.preview-page .md-code-block {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.85em;
+    line-height: 1.4;
+    color: #333;
+}
+
+.preview-page .md-blockquote {
+    border-left: 3px solid #666;
+    padding-left: 0.8em;
+    margin: 0.4em 0;
+    color: #555;
+    font-style: italic;
+}
+
+.preview-page .md-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.4em 0;
+    font-size: 0.9em;
+    break-inside: avoid;
+}
+
+.preview-page .md-th,
+.preview-page .md-td {
+    border: 1px solid #ddd;
+    padding: 0.3em 0.5em;
+    text-align: left;
+}
+
+.preview-page .md-th {
+    background: #f0f0f0;
+    font-weight: 600;
+}
+
+.preview-page .md-tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.preview-page .md-link {
+    color: #0066cc;
+    text-decoration: none;
+    border-bottom: 1px dotted #0066cc;
+}
+
+.preview-page .md-link:hover {
+    color: #0052a3;
+    border-bottom-style: solid;
+}
+
+.preview-page .md-strong {
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.preview-page .md-em {
+    font-style: italic;
+}
+
+.preview-page .md-hr {
+    border: none;
+    border-top: 1px solid #999;
+    margin: 0.5em 0;
+}
+
+/* KaTeX Math Styling */
+.preview-page .katex {
+    font-size: 1em;
+}
+
+.preview-page .katex-display {
+    margin: 0.5em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Prevent breaking inside elements */
+.preview-page h1,
+.preview-page h2,
+.preview-page h3,
+.preview-page h4,
+.preview-page h5,
+.preview-page h6,
+.preview-page pre,
+.preview-page table,
+.preview-page .katex-display {
+    break-inside: avoid;
+}
+
+/* Print optimization */
+@media print {
+    .preview-content {
+        padding: 0;
+        background: white;
+    }
+
+    .preview-page {
+        box-shadow: none;
+        margin: 0;
+    }
+}
