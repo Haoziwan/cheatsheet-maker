@@ -16,14 +16,27 @@ function Toolbar({
 
         try {
             const previewElement = previewRef.current;
+            const scalerElement = previewElement.parentElement;
+
+            // 保存当前的zoom值并临时移除
+            const originalZoom = scalerElement.style.zoom;
+            scalerElement.style.zoom = '1';
+
+            // 等待浏览器重新渲染
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             // Capture the preview as canvas
             const canvas = await html2canvas(previewElement, {
                 scale: 2,
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                windowWidth: previewElement.scrollWidth,
+                windowHeight: previewElement.scrollHeight
             });
+
+            // 恢复原来的zoom值
+            scalerElement.style.zoom = originalZoom;
 
             // Calculate PDF dimensions (A4)
             const imgWidth = 210; // A4 width in mm
