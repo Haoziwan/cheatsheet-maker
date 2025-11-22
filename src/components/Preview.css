@@ -58,6 +58,8 @@
 
 .page-column {
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
     /* Simulate column rule */
     border-right: 1px solid #ddd;
 }

@@ -41,37 +41,15 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
         measureEl.style.width = `${columnWidthPx}px`;
         measureEl.style.fontSize = `${fontSize}pt`;
 
-        // Force layout, then paginate
-        const children = Array.from(measureEl.children);
-        const layoutPages = [];
-        let currentPage = [];
-        for (let c = 0; c < columns; c++) currentPage.push({ remaining: columnHeightPx, items: [] });
-        let colIndex = 0;
-
-        children.forEach((child, idx) => {
-            const h = child.offsetHeight;
-            if (h > currentPage[colIndex].remaining) {
-                colIndex += 1;
-                if (colIndex >= columns) {
-                    layoutPages.push(currentPage.map(c => c.items));
-                    currentPage = [];
-                    for (let c = 0; c < columns; c++) currentPage.push({ remaining: columnHeightPx, items: [] });
-                    colIndex = 0;
-                }
-            }
-            currentPage[colIndex].items.push(idx);
-            currentPage[colIndex].remaining -= h;
-        });
-        layoutPages.push(currentPage.map(c => c.items));
-
         const container = pagesContainerRef.current;
         if (!container) return;
         container.innerHTML = '';
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
         container.style.gap = '12mm';
+        const children = Array.from(measureEl.children);
 
-        layoutPages.forEach((cols) => {
+        const createPage = () => {
             const page = document.createElement('div');
             page.className = 'preview-page';
             page.style.fontSize = `${fontSize}pt`;
@@ -82,18 +60,40 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
             grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
             grid.style.gap = `${gap}mm`;
 
-            cols.forEach((indices) => {
+            const cols = [];
+            for (let i = 0; i < columns; i++) {
                 const col = document.createElement('div');
                 col.className = 'page-column';
-                indices.forEach((i) => {
-                    const node = children[i].cloneNode(true);
-                    col.appendChild(node);
-                });
+                col.style.height = `${columnHeightPx}px`;
                 grid.appendChild(col);
-            });
+                cols.push(col);
+            }
 
             page.appendChild(grid);
             container.appendChild(page);
+            return cols;
+        };
+
+        let cols = createPage();
+        let colIndex = 0;
+
+        children.forEach((child) => {
+            const node = child.cloneNode(true);
+            cols[colIndex].appendChild(node);
+            const overflow = cols[colIndex].scrollHeight > cols[colIndex].clientHeight;
+            if (overflow) {
+                cols[colIndex].removeChild(node);
+                colIndex += 1;
+                if (colIndex >= columns) {
+                    cols = createPage();
+                    colIndex = 0;
+                }
+                cols[colIndex].appendChild(node);
+                // If still overflow, the block is taller than a single column; allow it to overflow within a fresh column to avoid clipping
+                if (cols[colIndex].scrollHeight > cols[colIndex].clientHeight) {
+                    cols[colIndex].style.overflow = 'visible';
+                }
+            }
         });
     }, [markdown, columns, fontSize, padding, gap]);
 
