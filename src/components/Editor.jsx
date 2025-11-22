@@ -1,4 +1,4 @@
-import { useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -38,6 +38,26 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                 editorRef.current.focus();
             }
         }
+    };
+
+    // Debounce function to prevent excessive updates and cursor jumping
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    };
+
+    const debouncedSetMarkdown = useCallback(
+        debounce((value) => {
+            setMarkdown(value);
+        }, 300),
+        [setMarkdown]
+    );
+
+    const handleEditorChange = (value) => {
+        debouncedSetMarkdown(value || '');
     };
 
     // Custom components to inject source line numbers
@@ -94,8 +114,8 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                         height="100%"
                         language="markdown"
                         theme="vs-dark"
-                        value={markdown}
-                        onChange={(value) => setMarkdown(value || '')}
+                        defaultValue={markdown}
+                        onChange={handleEditorChange}
                         onMount={handleEditorDidMount}
                         options={{
                             minimap: { enabled: false },
