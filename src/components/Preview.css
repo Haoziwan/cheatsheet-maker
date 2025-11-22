@@ -34,7 +34,6 @@
     padding: var(--spacing-xl);
     background: #4a4a4a;
     display: flex;
-    justify-content: center;
     align-items: flex-start;
 }
 

@@ -41,8 +41,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
         // Prepare measurer styles
         measureEl.style.width = `${columnWidthPx - gapPx}px`;
         measureEl.style.fontSize = `${fontSize}pt`;
-        measureEl.style.paddingLeft = `${gap/2}mm`;
-        measureEl.style.paddingRight = `${gap/2}mm`;
+        measureEl.style.paddingLeft = `${gap / 2}mm`;
+        measureEl.style.paddingRight = `${gap / 2}mm`;
 
         const container = pagesContainerRef.current;
         if (!container) return;
@@ -68,8 +68,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
                 const col = document.createElement('div');
                 col.className = 'page-column';
                 col.style.height = `${columnHeightPx}px`;
-                col.style.paddingLeft = `${gap/2}mm`;
-                col.style.paddingRight = `${gap/2}mm`;
+                col.style.paddingLeft = `${gap / 2}mm`;
+                col.style.paddingRight = `${gap / 2}mm`;
                 grid.appendChild(col);
                 cols.push(col);
             }
@@ -118,7 +118,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
                         justifyContent: 'center',
                         zoom: scale,
                         minWidth: '297mm',
-                        minHeight: '210mm'
+                        minHeight: '210mm',
+                        margin: 'auto'
                     }}
                 >
                     <div
