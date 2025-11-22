@@ -35,7 +35,7 @@ function Toolbar({
             for (let i = 0; i < pageElements.length; i++) {
                 const pageEl = pageElements[i];
                 const canvas = await html2canvas(pageEl, {
-                    scale: 2,
+                    scale: 4,
                     useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff',

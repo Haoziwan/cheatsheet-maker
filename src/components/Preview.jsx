@@ -34,12 +34,15 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
         const paddingPx = mmToPx(padding);
         const gapPx = mmToPx(gap);
         const contentWidthPx = pageWidthPx - paddingPx * 2;
-        const columnWidthPx = (contentWidthPx - gapPx * (columns - 1)) / columns;
+        const totalPaddingPx = gapPx * columns; // Total padding for all columns
+        const columnWidthPx = (contentWidthPx - totalPaddingPx) / columns;
         const columnHeightPx = pageHeightPx - paddingPx * 2;
 
         // Prepare measurer styles
-        measureEl.style.width = `${columnWidthPx}px`;
+        measureEl.style.width = `${columnWidthPx - gapPx}px`;
         measureEl.style.fontSize = `${fontSize}pt`;
+        measureEl.style.paddingLeft = `${gap/2}mm`;
+        measureEl.style.paddingRight = `${gap/2}mm`;
 
         const container = pagesContainerRef.current;
         if (!container) return;
@@ -58,13 +61,15 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
             const grid = document.createElement('div');
             grid.className = 'page-columns';
             grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-            grid.style.gap = `${gap}mm`;
+            grid.style.gap = '0mm'; // Remove gap as we'll use padding instead
 
             const cols = [];
             for (let i = 0; i < columns; i++) {
                 const col = document.createElement('div');
                 col.className = 'page-column';
                 col.style.height = `${columnHeightPx}px`;
+                col.style.paddingLeft = `${gap/2}mm`;
+                col.style.paddingRight = `${gap/2}mm`;
                 grid.appendChild(col);
                 cols.push(col);
             }

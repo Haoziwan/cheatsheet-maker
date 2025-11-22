@@ -57,11 +57,11 @@ $$
 
 function App() {
   const [markdown, setMarkdown] = useState(defaultMarkdown);
-  const [columns, setColumns] = useState(4);
+  const [columns, setColumns] = useState(5);
   const [fontSize, setFontSize] = useState(8);
-  const [padding, setPadding] = useState(15); // mm
-  const [gap, setGap] = useState(8); // mm
-  const [scale, setScale] = useState(1);
+  const [padding, setPadding] = useState(3); // mm
+  const [gap, setGap] = useState(1); // mm
+  const [scale, setScale] = useState(0.6);
   const [splitSize, setSplitSize] = useState(50);
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
