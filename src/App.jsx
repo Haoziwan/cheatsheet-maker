@@ -23,15 +23,6 @@ const defaultMarkdown = `# Markdown Cheatsheet
 1. First
 2. Second
 
-## Code
-Inline \`code\` and:
-
-\`\`\`javascript
-function hello() {
-  console.log("Hello!");
-}
-\`\`\`
-
 ## Math Formulas
 Inline math: $E = mc^2$
 
@@ -39,11 +30,6 @@ Block math:
 $$
 \\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}
 $$
-
-## Tables
-| Header 1 | Header 2 |
-|----------|----------|
-| Cell 1   | Cell 2   |
 
 ## Links
 [Link text](https://example.com)

@@ -1,4 +1,4 @@
-import { Download, FileText, Settings, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Download, Github, Settings, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import './Toolbar.css';
@@ -65,8 +65,10 @@ function Toolbar({
         <div className="toolbar">
             <div className="toolbar-left">
                 <div className="toolbar-brand">
-                    <FileText size={20} />
-                    <h1>Markdown Cheatsheet</h1>
+                    <a href="https://github.com/Haoziwan/cheatsheet-maker" target="_blank" rel="noopener noreferrer">
+                        <Github size={20} />
+                    </a>
+                    <h1>cheatsheet maker</h1>
                 </div>
             </div>
 

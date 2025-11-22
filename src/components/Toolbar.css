@@ -42,6 +42,17 @@
     color: var(--color-text-primary);
 }
 
+.toolbar-brand a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.toolbar-brand a:hover {
+    color: var(--color-accent-primary);
+}
+
 .toolbar-control {
     display: flex;
     align-items: center;
