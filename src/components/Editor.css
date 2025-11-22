@@ -53,6 +53,12 @@
     border-color: var(--color-text-tertiary);
 }
 
+.editor-toggle-btn.active {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border-color: var(--color-text-tertiary);
+}
+
 .editor-content {
     flex: 1;
     overflow: hidden;
@@ -65,7 +71,6 @@
     height: 100%;
     overflow: auto;
     min-width: 0;
-    /* Prevent flex items from overflowing */
 }
 
 .editor-pane.hidden {
@@ -82,23 +87,11 @@
     border-right: none;
 }
 
-.editor-textarea {
-    width: 100%;
-    min-height: 100%;
-    padding: var(--spacing-lg);
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    border: none;
-    outline: none;
-    font-family: var(--font-family-mono);
-    font-size: 0.875rem;
-    line-height: 1.6;
-    resize: none;
-    tab-size: 2;
-}
-
-.editor-textarea::placeholder {
-    color: var(--color-text-tertiary);
+/* Monaco Editor Pane Overrides */
+.editor-pane.editor-pane-edit {
+    overflow: hidden;
+    /* Monaco handles its own scrolling */
+    padding: 0;
 }
 
 .editor-pane-preview {
@@ -109,6 +102,7 @@
     line-height: 1.6;
 }
 
+/* Markdown Styles */
 .editor-pane-preview .markdown-body h1,
 .editor-pane-preview .markdown-body h2,
 .editor-pane-preview .markdown-body h3 {
@@ -175,21 +169,20 @@
     gap: 4px;
 }
 
-.editor-toggle-btn.active {
-    background: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    border-color: var(--color-text-tertiary);
+/* Click-to-jump visual cues */
+.editor-pane-preview [data-line] {
+    cursor: pointer;
+    position: relative;
 }
 
-/* Line numbers effect (optional enhancement) */
-.editor-pane-edit {
-    background:
-        linear-gradient(to right,
-            var(--color-bg-tertiary) 0,
-            var(--color-bg-tertiary) 50px,
-            var(--color-bg-secondary) 50px);
-}
-
-.editor-textarea {
-    padding-left: 60px;
+.editor-pane-preview [data-line]:hover::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--color-accent-primary);
+    border-radius: 2px;
+    opacity: 0.5;
 }

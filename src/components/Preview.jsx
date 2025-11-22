@@ -5,7 +5,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale, onLineClick }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -22,6 +22,17 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
             document.body.removeChild(div);
         }
         return mm * pxPerMmRef.current;
+    };
+
+    const handlePageClick = (e) => {
+        if (!onLineClick) return;
+        const target = e.target.closest('[data-line]');
+        if (target) {
+            const line = parseInt(target.getAttribute('data-line'), 10);
+            if (!isNaN(line)) {
+                onLineClick(line);
+            }
+        }
     };
 
     useEffect(() => {
@@ -102,6 +113,36 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
         });
     }, [markdown, columns, fontSize, padding, gap]);
 
+    // Custom components to inject source line numbers
+    const components = {
+        h1: (props) => <h1 className="md-h1" data-line={props.node?.position?.start?.line} {...props} />,
+        h2: (props) => <h2 className="md-h2" data-line={props.node?.position?.start?.line} {...props} />,
+        h3: (props) => <h3 className="md-h3" data-line={props.node?.position?.start?.line} {...props} />,
+        h4: (props) => <h4 className="md-h4" data-line={props.node?.position?.start?.line} {...props} />,
+        h5: (props) => <h5 className="md-h5" data-line={props.node?.position?.start?.line} {...props} />,
+        h6: (props) => <h6 className="md-h6" data-line={props.node?.position?.start?.line} {...props} />,
+        p: (props) => <p className="md-p" data-line={props.node?.position?.start?.line} {...props} />,
+        ul: (props) => <ul className="md-ul" {...props} />,
+        ol: (props) => <ol className="md-ol" {...props} />,
+        li: (props) => <li className="md-li" data-line={props.node?.position?.start?.line} {...props} />,
+        code: ({ inline, ...props }) =>
+            inline ?
+                <code className="md-code-inline" {...props} /> :
+                <code className="md-code-block" {...props} />,
+        pre: (props) => <pre className="md-pre" data-line={props.node?.position?.start?.line} {...props} />,
+        blockquote: (props) => <blockquote className="md-blockquote" data-line={props.node?.position?.start?.line} {...props} />,
+        table: (props) => <table className="md-table" data-line={props.node?.position?.start?.line} {...props} />,
+        thead: (props) => <thead className="md-thead" {...props} />,
+        tbody: (props) => <tbody className="md-tbody" {...props} />,
+        tr: (props) => <tr className="md-tr" {...props} />,
+        th: (props) => <th className="md-th" {...props} />,
+        td: (props) => <td className="md-td" {...props} />,
+        a: (props) => <a className="md-link" {...props} />,
+        strong: (props) => <strong className="md-strong" {...props} />,
+        em: (props) => <em className="md-em" {...props} />,
+        hr: (props) => <hr className="md-hr" {...props} />,
+    };
+
     return (
         <div className="preview">
             <div className="preview-header">
@@ -121,6 +162,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
                         minHeight: '210mm',
                         margin: 'auto'
                     }}
+                    onClick={handlePageClick}
                 >
                     <div
                         ref={(el) => {
@@ -139,34 +181,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
                     <ReactMarkdown
                         remarkPlugins={[remarkMath]}
                         rehypePlugins={[rehypeKatex]}
-                        components={{
-                            h1: (props) => <h1 className="md-h1" {...props} />,
-                            h2: (props) => <h2 className="md-h2" {...props} />,
-                            h3: (props) => <h3 className="md-h3" {...props} />,
-                            h4: (props) => <h4 className="md-h4" {...props} />,
-                            h5: (props) => <h5 className="md-h5" {...props} />,
-                            h6: (props) => <h6 className="md-h6" {...props} />,
-                            p: (props) => <p className="md-p" {...props} />,
-                            ul: (props) => <ul className="md-ul" {...props} />,
-                            ol: (props) => <ol className="md-ol" {...props} />,
-                            li: (props) => <li className="md-li" {...props} />,
-                            code: ({ inline, ...props }) =>
-                                inline ?
-                                    <code className="md-code-inline" {...props} /> :
-                                    <code className="md-code-block" {...props} />,
-                            pre: (props) => <pre className="md-pre" {...props} />,
-                            blockquote: (props) => <blockquote className="md-blockquote" {...props} />,
-                            table: (props) => <table className="md-table" {...props} />,
-                            thead: (props) => <thead className="md-thead" {...props} />,
-                            tbody: (props) => <tbody className="md-tbody" {...props} />,
-                            tr: (props) => <tr className="md-tr" {...props} />,
-                            th: (props) => <th className="md-th" {...props} />,
-                            td: (props) => <td className="md-td" {...props} />,
-                            a: (props) => <a className="md-link" {...props} />,
-                            strong: (props) => <strong className="md-strong" {...props} />,
-                            em: (props) => <em className="md-em" {...props} />,
-                            hr: (props) => <hr className="md-hr" {...props} />,
-                        }}
+                        components={components}
                     >
                         {markdown}
                     </ReactMarkdown>

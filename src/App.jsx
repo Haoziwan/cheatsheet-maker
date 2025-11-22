@@ -51,6 +51,7 @@ function App() {
   const [splitSize, setSplitSize] = useState(50);
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
+  const editorRef = useRef(null);
 
   useEffect(() => {
     const handleWheel = (e) => {
@@ -90,7 +91,11 @@ function App() {
       />
       <div className="main-content">
         <div className="editor-panel" style={{ width: `${splitSize}%` }}>
-          <Editor markdown={markdown} setMarkdown={setMarkdown} />
+          <Editor
+            ref={editorRef}
+            markdown={markdown}
+            setMarkdown={setMarkdown}
+          />
         </div>
         <div
           className="resize-handle"
@@ -129,6 +134,7 @@ function App() {
             padding={padding}
             gap={gap}
             scale={scale}
+            onLineClick={(line) => editorRef.current?.scrollToLine(line)}
           />
         </div>
       </div>

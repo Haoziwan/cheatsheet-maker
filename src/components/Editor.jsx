@@ -1,42 +1,59 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Eye, EyeOff, Edit3, Columns } from 'lucide-react';
+import { Eye, Edit3, Columns } from 'lucide-react';
+import MonacoEditor from '@monaco-editor/react';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
 
-function Editor({ markdown, setMarkdown }) {
-    const textareaRef = useRef(null);
+const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
+    const editorRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
 
-    useEffect(() => {
-        // Auto-resize textarea only in edit or split mode
-        if (viewMode !== 'preview') {
-            const textarea = textareaRef.current;
-            if (textarea) {
-                textarea.style.height = 'auto';
-                textarea.style.height = textarea.scrollHeight + 'px';
+    useImperativeHandle(ref, () => ({
+        scrollToLine: (line) => {
+            if (editorRef.current) {
+                editorRef.current.revealLineInCenter(line);
+                editorRef.current.setPosition({ lineNumber: line, column: 1 });
+                editorRef.current.focus();
             }
         }
-    }, [markdown, viewMode]);
+    }));
 
-    const handleKeyDown = (e) => {
-        // Tab key support
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            const newValue = markdown.substring(0, start) + '  ' + markdown.substring(end);
-            setMarkdown(newValue);
+    const handleEditorDidMount = (editor, monaco) => {
+        editorRef.current = editor;
+    };
 
-            // Set cursor position after the inserted spaces
-            setTimeout(() => {
-                e.target.selectionStart = e.target.selectionEnd = start + 2;
-            }, 0);
+    const handlePreviewClick = (e) => {
+        if (!editorRef.current) return;
+
+        // Find the closest element with a data-line attribute
+        const target = e.target.closest('[data-line]');
+        if (target) {
+            const line = parseInt(target.getAttribute('data-line'), 10);
+            if (!isNaN(line)) {
+                editorRef.current.revealLineInCenter(line);
+                editorRef.current.setPosition({ lineNumber: line, column: 1 });
+                editorRef.current.focus();
+            }
         }
     };
 
+    // Custom components to inject source line numbers
+    const components = {
+        p: ({ node, ...props }) => <p data-line={node?.position?.start?.line} {...props} />,
+        h1: ({ node, ...props }) => <h1 data-line={node?.position?.start?.line} {...props} />,
+        h2: ({ node, ...props }) => <h2 data-line={node?.position?.start?.line} {...props} />,
+        h3: ({ node, ...props }) => <h3 data-line={node?.position?.start?.line} {...props} />,
+        h4: ({ node, ...props }) => <h4 data-line={node?.position?.start?.line} {...props} />,
+        h5: ({ node, ...props }) => <h5 data-line={node?.position?.start?.line} {...props} />,
+        h6: ({ node, ...props }) => <h6 data-line={node?.position?.start?.line} {...props} />,
+        li: ({ node, ...props }) => <li data-line={node?.position?.start?.line} {...props} />,
+        blockquote: ({ node, ...props }) => <blockquote data-line={node?.position?.start?.line} {...props} />,
+        pre: ({ node, ...props }) => <pre data-line={node?.position?.start?.line} {...props} />,
+        table: ({ node, ...props }) => <table data-line={node?.position?.start?.line} {...props} />,
+    };
 
     return (
         <div className="editor">
@@ -73,21 +90,34 @@ function Editor({ markdown, setMarkdown }) {
             </div>
             <div className="editor-content">
                 <div className={`editor-pane editor-pane-edit ${viewMode === 'preview' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}>
-                    <textarea
-                        ref={textareaRef}
-                        className="editor-textarea"
+                    <MonacoEditor
+                        height="100%"
+                        language="markdown"
+                        theme="vs-dark"
                         value={markdown}
-                        onChange={(e) => setMarkdown(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Start typing your markdown here..."
-                        spellCheck={false}
+                        onChange={(value) => setMarkdown(value || '')}
+                        onMount={handleEditorDidMount}
+                        options={{
+                            minimap: { enabled: false },
+                            wordWrap: 'on',
+                            fontSize: 14,
+                            lineNumbers: 'on',
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            padding: { top: 16, bottom: 16 },
+                            fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+                        }}
                     />
                 </div>
-                <div className={`editor-pane editor-pane-preview ${viewMode === 'edit' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}>
+                <div
+                    className={`editor-pane editor-pane-preview ${viewMode === 'edit' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}
+                    onClick={handlePreviewClick}
+                >
                     <div className="markdown-body">
                         <ReactMarkdown
                             remarkPlugins={[remarkMath]}
                             rehypePlugins={[rehypeKatex]}
+                            components={components}
                         >
                             {markdown}
                         </ReactMarkdown>
@@ -96,6 +126,8 @@ function Editor({ markdown, setMarkdown }) {
             </div>
         </div>
     );
-}
+});
+
+Editor.displayName = 'Editor';
 
 export default Editor;
