@@ -39,16 +39,31 @@
 }
 
 .preview-page {
-    width: 210mm;
-    min-height: 297mm;
+    width: 297mm;
+    height: 210mm;
     background: white;
     padding: 15mm;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     color: #000;
-    column-gap: 8mm;
-    column-rule: 1px solid #ddd;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     line-height: 1.4;
+}
+
+.page-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8mm;
+    height: 100%;
+}
+
+.page-column {
+    overflow: hidden;
+    /* Simulate column rule */
+    border-right: 1px solid #ddd;
+}
+
+.page-column:last-child {
+    border-right: none;
 }
 
 /* Markdown Styles */

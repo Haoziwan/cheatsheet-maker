@@ -15,8 +15,8 @@ function Toolbar({
         if (!previewRef.current) return;
 
         try {
-            const previewElement = previewRef.current;
-            const scalerElement = previewElement.parentElement;
+            const pagesContainer = previewRef.current;
+            const scalerElement = pagesContainer.parentElement;
 
             // 保存当前的zoom值并临时移除
             const originalZoom = scalerElement.style.zoom;
@@ -25,28 +25,35 @@ function Toolbar({
             // 等待浏览器重新渲染
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // Capture the preview as canvas
-            const canvas = await html2canvas(previewElement, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                windowWidth: previewElement.scrollWidth,
-                windowHeight: previewElement.scrollHeight
-            });
+            // Collect page elements
+            const pageElements = pagesContainer.querySelectorAll('.preview-page');
+
+            // Create PDF (landscape)
+            const pdf = new jsPDF('l', 'mm', 'a4');
+
+            // Render each page to canvas and add to PDF
+            for (let i = 0; i < pageElements.length; i++) {
+                const pageEl = pageElements[i];
+                const canvas = await html2canvas(pageEl, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    windowWidth: pageEl.scrollWidth,
+                    windowHeight: pageEl.scrollHeight
+                });
+
+                const imgWidthMM = 297;
+                const imgHeightMM = 210;
+                const imgData = canvas.toDataURL('image/png');
+
+                if (i > 0) pdf.addPage('a4', 'l');
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM);
+            }
 
             // 恢复原来的zoom值
             scalerElement.style.zoom = originalZoom;
 
-            // Calculate PDF dimensions (A4)
-            const imgWidth = 210; // A4 width in mm
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            // Create PDF
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgData = canvas.toDataURL('image/png');
-
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             pdf.save('cheatsheet.pdf');
         } catch (error) {
             console.error('Error generating PDF:', error);

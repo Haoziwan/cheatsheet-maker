@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -6,6 +6,97 @@ import 'katex/dist/katex.min.css';
 import './Preview.css';
 
 const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }, ref) => {
+    const measureRef = useRef(null);
+    const pagesContainerRef = useRef(null);
+
+    const pxPerMmRef = useRef(null);
+    const mmToPx = (mm) => {
+        if (pxPerMmRef.current == null) {
+            const div = document.createElement('div');
+            div.style.position = 'absolute';
+            div.style.left = '-9999px';
+            div.style.top = '-9999px';
+            div.style.width = '1mm';
+            document.body.appendChild(div);
+            pxPerMmRef.current = div.getBoundingClientRect().width;
+            document.body.removeChild(div);
+        }
+        return mm * pxPerMmRef.current;
+    };
+
+    useEffect(() => {
+        const measureEl = measureRef.current;
+        if (!measureEl) return;
+
+        // Compute column width/height in px based on A4 landscape and current paddings/gaps
+        const pageWidthPx = mmToPx(297);
+        const pageHeightPx = mmToPx(210);
+        const paddingPx = mmToPx(padding);
+        const gapPx = mmToPx(gap);
+        const contentWidthPx = pageWidthPx - paddingPx * 2;
+        const columnWidthPx = (contentWidthPx - gapPx * (columns - 1)) / columns;
+        const columnHeightPx = pageHeightPx - paddingPx * 2;
+
+        // Prepare measurer styles
+        measureEl.style.width = `${columnWidthPx}px`;
+        measureEl.style.fontSize = `${fontSize}pt`;
+
+        // Force layout, then paginate
+        const children = Array.from(measureEl.children);
+        const layoutPages = [];
+        let currentPage = [];
+        for (let c = 0; c < columns; c++) currentPage.push({ remaining: columnHeightPx, items: [] });
+        let colIndex = 0;
+
+        children.forEach((child, idx) => {
+            const h = child.offsetHeight;
+            if (h > currentPage[colIndex].remaining) {
+                colIndex += 1;
+                if (colIndex >= columns) {
+                    layoutPages.push(currentPage.map(c => c.items));
+                    currentPage = [];
+                    for (let c = 0; c < columns; c++) currentPage.push({ remaining: columnHeightPx, items: [] });
+                    colIndex = 0;
+                }
+            }
+            currentPage[colIndex].items.push(idx);
+            currentPage[colIndex].remaining -= h;
+        });
+        layoutPages.push(currentPage.map(c => c.items));
+
+        const container = pagesContainerRef.current;
+        if (!container) return;
+        container.innerHTML = '';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.gap = '12mm';
+
+        layoutPages.forEach((cols) => {
+            const page = document.createElement('div');
+            page.className = 'preview-page';
+            page.style.fontSize = `${fontSize}pt`;
+            page.style.padding = `${padding}mm`;
+
+            const grid = document.createElement('div');
+            grid.className = 'page-columns';
+            grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            grid.style.gap = `${gap}mm`;
+
+            cols.forEach((indices) => {
+                const col = document.createElement('div');
+                col.className = 'page-column';
+                indices.forEach((i) => {
+                    const node = children[i].cloneNode(true);
+                    col.appendChild(node);
+                });
+                grid.appendChild(col);
+            });
+
+            page.appendChild(grid);
+            container.appendChild(page);
+        });
+    }, [markdown, columns, fontSize, padding, gap]);
+
     return (
         <div className="preview">
             <div className="preview-header">
@@ -21,56 +112,58 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale }
                         display: 'flex',
                         justifyContent: 'center',
                         zoom: scale,
-                        minWidth: '210mm',
-                        minHeight: '297mm'
+                        minWidth: '297mm',
+                        minHeight: '210mm'
                     }}
                 >
                     <div
-                        ref={ref}
-                        className="preview-page"
-                        style={{
-                            columnCount: columns,
-                            fontSize: `${fontSize}pt`,
-                            padding: `${padding}mm`,
-                            columnGap: `${gap}mm`,
-                            // Remove transform here if using zoom
+                        ref={(el) => {
+                            pagesContainerRef.current = el;
+                            if (typeof ref === 'function') ref(el);
+                            else if (ref) ref.current = el;
+                        }}
+                    />
+                </div>
+                {/* Hidden measurer */}
+                <div
+                    ref={measureRef}
+                    style={{ position: 'absolute', left: '-9999px', top: '-9999px', visibility: 'hidden' }}
+                    className="md-measurer"
+                >
+                    <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={{
+                            h1: (props) => <h1 className="md-h1" {...props} />,
+                            h2: (props) => <h2 className="md-h2" {...props} />,
+                            h3: (props) => <h3 className="md-h3" {...props} />,
+                            h4: (props) => <h4 className="md-h4" {...props} />,
+                            h5: (props) => <h5 className="md-h5" {...props} />,
+                            h6: (props) => <h6 className="md-h6" {...props} />,
+                            p: (props) => <p className="md-p" {...props} />,
+                            ul: (props) => <ul className="md-ul" {...props} />,
+                            ol: (props) => <ol className="md-ol" {...props} />,
+                            li: (props) => <li className="md-li" {...props} />,
+                            code: ({ inline, ...props }) =>
+                                inline ?
+                                    <code className="md-code-inline" {...props} /> :
+                                    <code className="md-code-block" {...props} />,
+                            pre: (props) => <pre className="md-pre" {...props} />,
+                            blockquote: (props) => <blockquote className="md-blockquote" {...props} />,
+                            table: (props) => <table className="md-table" {...props} />,
+                            thead: (props) => <thead className="md-thead" {...props} />,
+                            tbody: (props) => <tbody className="md-tbody" {...props} />,
+                            tr: (props) => <tr className="md-tr" {...props} />,
+                            th: (props) => <th className="md-th" {...props} />,
+                            td: (props) => <td className="md-td" {...props} />,
+                            a: (props) => <a className="md-link" {...props} />,
+                            strong: (props) => <strong className="md-strong" {...props} />,
+                            em: (props) => <em className="md-em" {...props} />,
+                            hr: (props) => <hr className="md-hr" {...props} />,
                         }}
                     >
-                        <ReactMarkdown
-                            remarkPlugins={[remarkMath]}
-                            rehypePlugins={[rehypeKatex]}
-                            components={{
-                                h1: ({ node, ...props }) => <h1 className="md-h1" {...props} />,
-                                h2: ({ node, ...props }) => <h2 className="md-h2" {...props} />,
-                                h3: ({ node, ...props }) => <h3 className="md-h3" {...props} />,
-                                h4: ({ node, ...props }) => <h4 className="md-h4" {...props} />,
-                                h5: ({ node, ...props }) => <h5 className="md-h5" {...props} />,
-                                h6: ({ node, ...props }) => <h6 className="md-h6" {...props} />,
-                                p: ({ node, ...props }) => <p className="md-p" {...props} />,
-                                ul: ({ node, ...props }) => <ul className="md-ul" {...props} />,
-                                ol: ({ node, ...props }) => <ol className="md-ol" {...props} />,
-                                li: ({ node, ...props }) => <li className="md-li" {...props} />,
-                                code: ({ node, inline, ...props }) =>
-                                    inline ?
-                                        <code className="md-code-inline" {...props} /> :
-                                        <code className="md-code-block" {...props} />,
-                                pre: ({ node, ...props }) => <pre className="md-pre" {...props} />,
-                                blockquote: ({ node, ...props }) => <blockquote className="md-blockquote" {...props} />,
-                                table: ({ node, ...props }) => <table className="md-table" {...props} />,
-                                thead: ({ node, ...props }) => <thead className="md-thead" {...props} />,
-                                tbody: ({ node, ...props }) => <tbody className="md-tbody" {...props} />,
-                                tr: ({ node, ...props }) => <tr className="md-tr" {...props} />,
-                                th: ({ node, ...props }) => <th className="md-th" {...props} />,
-                                td: ({ node, ...props }) => <td className="md-td" {...props} />,
-                                a: ({ node, ...props }) => <a className="md-link" {...props} />,
-                                strong: ({ node, ...props }) => <strong className="md-strong" {...props} />,
-                                em: ({ node, ...props }) => <em className="md-em" {...props} />,
-                                hr: ({ node, ...props }) => <hr className="md-hr" {...props} />,
-                            }}
-                        >
-                            {markdown}
-                        </ReactMarkdown>
-                    </div>
+                        {markdown}
+                    </ReactMarkdown>
                 </div>
             </div>
         </div>

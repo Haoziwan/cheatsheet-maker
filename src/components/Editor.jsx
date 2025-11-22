@@ -37,11 +37,6 @@ function Editor({ markdown, setMarkdown }) {
         }
     };
 
-    const toggleViewMode = () => {
-        if (viewMode === 'edit') setViewMode('split');
-        else if (viewMode === 'split') setViewMode('preview');
-        else setViewMode('edit');
-    };
 
     return (
         <div className="editor">
