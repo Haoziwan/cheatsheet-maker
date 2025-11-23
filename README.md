@@ -9,9 +9,8 @@ A React-based application for creating and exporting cheatsheets as PDF document
 
 - Real-time Markdown editing with syntax highlighting
 - Live preview of formatted Markdown content
-- PDF export functionality
-- Customizable layout settings
-- Support for code blocks with syntax highlighting
+- PDF export via browser print functionality
+- Customizable multi-column layout settings
 - Mathematical expressions with KaTeX
 
 
@@ -21,7 +20,7 @@ A React-based application for creating and exporting cheatsheets as PDF document
 - Vite
 - Monaco Editor for code editing
 - KaTeX for mathematical expressions
-- html2canvas and react-pdf for PDF generation
+
 
 ## Getting Started
 
