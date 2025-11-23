@@ -6,10 +6,11 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import themes from '../styles/themes';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, onLineClick }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, onLineClick }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -81,6 +82,22 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             page.style.lineHeight = lineHeight;
             page.style.padding = `${padding}mm`;
 
+            // Apply theme
+            const currentTheme = themes[theme] || themes.classic;
+            if (currentTheme.cssVars) {
+                Object.entries(currentTheme.cssVars).forEach(([key, value]) => {
+                    page.style.setProperty(key, value);
+                });
+            }
+
+            // Apply background and text colors
+            if (currentTheme.cssVars['--theme-bg']) {
+                page.style.background = currentTheme.cssVars['--theme-bg'];
+            }
+            if (currentTheme.cssVars['--theme-text']) {
+                page.style.color = currentTheme.cssVars['--theme-text'];
+            }
+
             const grid = document.createElement('div');
             grid.className = 'page-columns';
             grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
@@ -123,17 +140,23 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 }
             }
         });
-    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation]);
+    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme]);
 
-    // Custom components to inject source line numbers
+    // Custom components to inject source line numbers and apply theme styles
+    const currentTheme = themes[theme] || themes.classic;
+    const themeStyles = currentTheme.styles || {};
+
     const components = {
-        h1: (props) => <h1 className="md-h1" data-line={props.node?.position?.start?.line} {...props} />,
-        h2: (props) => <h2 className="md-h2" data-line={props.node?.position?.start?.line} {...props} />,
-        h3: (props) => <h3 className="md-h3" data-line={props.node?.position?.start?.line} {...props} />,
-        h4: (props) => <h4 className="md-h4" data-line={props.node?.position?.start?.line} {...props} />,
-        h5: (props) => <h5 className="md-h5" data-line={props.node?.position?.start?.line} {...props} />,
-        h6: (props) => <h6 className="md-h6" data-line={props.node?.position?.start?.line} {...props} />,
-        p: (props) => <p className="md-p" data-line={props.node?.position?.start?.line} {...props} />,
+        h1: (props) => <h1 className="md-h1" style={themeStyles.h1} data-line={props.node?.position?.start?.line} {...props} />,
+        h2: (props) => <h2 className="md-h2" style={themeStyles.h2} data-line={props.node?.position?.start?.line} {...props} />,
+        h3: (props) => <h3 className="md-h3" style={themeStyles.h3} data-line={props.node?.position?.start?.line} {...props} />,
+        h4: (props) => <h4 className="md-h4" style={themeStyles.h4 || themeStyles.h3} data-line={props.node?.position?.start?.line} {...props} />,
+        h5: (props) => <h5 className="md-h5" style={themeStyles.h5 || themeStyles.h3} data-line={props.node?.position?.start?.line} {...props} />,
+        h6: (props) => <h6 className="md-h6" style={themeStyles.h6 || themeStyles.h3} data-line={props.node?.position?.start?.line} {...props} />,
+        p: (props) => {
+            const style = themeStyles.paragraph || {};
+            return <p className="md-p" style={style} data-line={props.node?.position?.start?.line} {...props} />;
+        },
         ul: (props) => <ul className="md-ul" {...props} />,
         ol: (props) => <ol className="md-ol" {...props} />,
         li: (props) => <li className="md-li" data-line={props.node?.position?.start?.line} {...props} />,
@@ -153,8 +176,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                         fontSize: '0.75em',
                         borderRadius: '4px',
                         lineHeight: '1.4',
-                        background: '#f8f8f8',
-                        border: '1px solid #ddd',
+                        ...(themeStyles.codeBlock || {}),
                     }}
                     codeTagProps={{
                         style: {
@@ -166,21 +188,49 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     {String(children).replace(/\n$/, '')}
                 </SyntaxHighlighter>
             ) : (
-                <code className="md-code-inline" {...props}>
+                <code className="md-code-inline" style={themeStyles.codeInline} {...props}>
                     {children}
                 </code>
             );
         },
         pre: (props) => <div className="md-pre" data-line={props.node?.position?.start?.line} {...props} />,
-        blockquote: (props) => <blockquote className="md-blockquote" data-line={props.node?.position?.start?.line} {...props} />,
-        table: (props) => <table className="md-table" data-line={props.node?.position?.start?.line} {...props} />,
+        blockquote: (props) => {
+            const style = themeStyles.blockquote || {};
+            return <blockquote className="md-blockquote" style={style} data-line={props.node?.position?.start?.line} {...props} />;
+        },
+        table: (props) => {
+            const style = themeStyles.table?.boxShadow ? { boxShadow: themeStyles.table.boxShadow } : {};
+            return <table className="md-table" style={style} data-line={props.node?.position?.start?.line} {...props} />;
+        },
         thead: (props) => <thead className="md-thead" {...props} />,
         tbody: (props) => <tbody className="md-tbody" {...props} />,
         tr: (props) => <tr className="md-tr" {...props} />,
-        th: (props) => <th className="md-th" {...props} />,
-        td: (props) => <td className="md-td" {...props} />,
-        a: (props) => <a className="md-link" {...props} />,
-        strong: (props) => <strong className="md-strong" {...props} />,
+        th: (props) => {
+            const style = {};
+            if (themeStyles.table) {
+                if (themeStyles.table.headerBg) style.background = themeStyles.table.headerBg;
+                if (themeStyles.table.headerColor) style.color = themeStyles.table.headerColor;
+                if (themeStyles.table.headerFontWeight) style.fontWeight = themeStyles.table.headerFontWeight;
+                if (themeStyles.table.headerTextShadow) style.textShadow = themeStyles.table.headerTextShadow;
+                if (themeStyles.table.cellBorder) style.border = themeStyles.table.cellBorder;
+            }
+            return <th className="md-th" style={style} {...props} />;
+        },
+        td: (props) => {
+            const style = {};
+            if (themeStyles.table?.cellBorder) {
+                style.border = themeStyles.table.cellBorder;
+            }
+            if (themeStyles.table?.cellColor) {
+                style.color = themeStyles.table.cellColor;
+            }
+            return <td className="md-td" style={style} {...props} />;
+        },
+        a: (props) => <a className="md-link" style={themeStyles.link} {...props} />,
+        strong: (props) => {
+            const style = themeStyles.strong || {};
+            return <strong className="md-strong" style={style} {...props} />;
+        },
         em: (props) => <em className="md-em" {...props} />,
         hr: (props) => <hr className="md-hr" {...props} />,
         img: (props) => <img className="md-img" data-line={props.node?.position?.start?.line} {...props} />,

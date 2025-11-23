@@ -53,7 +53,7 @@ function hello() {
 
 ## Tables
 | Header 1 | Header 2 | Header 3 |
-| :------- | :------: | -------: |
+| ------- | ------ | ------- |
 | Cell 1   | Cell 2   | Cell 3   |
 | Cell 4   | Cell 5   | Cell 6   |
 
@@ -88,6 +88,7 @@ function App() {
   const [lineHeight, setLineHeight] = useLocalStorage('cheatsheet_lineHeight', 1.2);
   const [scale, setScale] = useState(0.6); // Don't persist scale, start with a reasonable default
   const [orientation, setOrientation] = useLocalStorage('cheatsheet_orientation', 'landscape');
+  const [theme, setTheme] = useLocalStorage('cheatsheet_theme', 'classic');
   const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
@@ -131,6 +132,8 @@ function App() {
         setScale={setScale}
         orientation={orientation}
         setOrientation={setOrientation}
+        theme={theme}
+        setTheme={setTheme}
         previewRef={previewRef}
       />
       <div className="main-content">
@@ -181,6 +184,7 @@ function App() {
             scale={scale}
             setScale={setScale}
             orientation={orientation}
+            theme={theme}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
           />
         </div>

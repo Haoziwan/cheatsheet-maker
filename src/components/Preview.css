@@ -164,7 +164,7 @@
 }
 
 .preview-page .md-blockquote {
-    border-left: 3px solid #666;
+    border-left: 3px solid var(--theme-quote-border, #666);
     padding-left: 0.8em;
     margin: 0.4em 0;
     color: #555;
@@ -183,7 +183,7 @@
 
 .preview-page .md-th,
 .preview-page .md-td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--theme-border, #ddd);
     padding: 0.3em 0.5em;
     text-align: left;
     word-wrap: break-word;
@@ -195,6 +195,7 @@
     background: #f0f0f0;
     font-weight: 600;
     white-space: nowrap;
+    color: inherit;
 }
 
 .preview-page .md-td {
@@ -202,7 +203,7 @@
 }
 
 .preview-page .md-tr:nth-child(even) {
-    background: #f9f9f9;
+    background: var(--theme-table-striped, #f9f9f9);
 }
 
 .preview-page .md-link {
@@ -218,7 +219,7 @@
 
 .preview-page .md-strong {
     font-weight: 700;
-    color: #1a1a1a;
+    color: #d35400; /* Orange color for bold text */
 }
 
 .preview-page .md-em {

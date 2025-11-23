@@ -1,4 +1,5 @@
 import { Download, Github, RectangleHorizontal, RectangleVertical } from 'lucide-react';
+import themes from '../styles/themes';
 import './Toolbar.css';
 
 function Toolbar({
@@ -8,6 +9,7 @@ function Toolbar({
     gap, setGap,
     lineHeight, setLineHeight,
     orientation, setOrientation,
+    theme, setTheme,
     previewRef
 }) {
     const handleExportPDF = () => {
@@ -29,6 +31,21 @@ function Toolbar({
             </div>
 
             <div className="toolbar-center">
+                <div className="toolbar-control">
+                    <label className="label">Theme</label>
+                    <select
+                        value={theme}
+                        onChange={(e) => setTheme(e.target.value)}
+                        className="select"
+                    >
+                        {Object.entries(themes).map(([key, themeData]) => (
+                            <option key={key} value={key}>
+                                {themeData.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 <div className="toolbar-control">
                     <label className="label">Columns</label>
                     <input
