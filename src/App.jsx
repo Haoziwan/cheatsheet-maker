@@ -51,10 +51,10 @@ function hello() {
 \`\`\`
 
 ## Tables
-| Header 1 | Header 2 |
-| :------- | :------- |
-| Cell 1   | Cell 2   |
-| Cell 3   | Cell 4   |
+| Header 1 | Header 2 | Header 3 |
+| :------- | :------: | -------: |
+| Cell 1   | Cell 2   | Cell 3   |
+| Cell 4   | Cell 5   | Cell 6   |
 
 ## Blockquotes
 > This is a blockquote.

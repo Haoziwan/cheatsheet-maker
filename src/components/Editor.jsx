@@ -1,6 +1,7 @@
 import { useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import { Eye, Edit3, Columns } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
@@ -135,7 +136,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                 >
                     <div className="markdown-body">
                         <ReactMarkdown
-                            remarkPlugins={[remarkMath]}
+                            remarkPlugins={[remarkMath, remarkGfm]}
                             rehypePlugins={[rehypeKatex]}
                             components={components}
                         >

@@ -164,6 +164,29 @@
     margin-bottom: 1em;
 }
 
+.editor-pane-preview .markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1em;
+    font-size: 0.9rem;
+}
+
+.editor-pane-preview .markdown-body th,
+.editor-pane-preview .markdown-body td {
+    border: 1px solid var(--color-border);
+    padding: 0.5em;
+    text-align: left;
+}
+
+.editor-pane-preview .markdown-body th {
+    background: var(--color-bg-tertiary);
+    font-weight: 600;
+}
+
+.editor-pane-preview .markdown-body tr:nth-child(even) {
+    background: var(--color-bg-primary);
+}
+
 .editor-header-right {
     display: flex;
     gap: 4px;
