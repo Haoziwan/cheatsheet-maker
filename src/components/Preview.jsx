@@ -2,6 +2,9 @@ import { forwardRef, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
@@ -127,11 +130,41 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         ul: (props) => <ul className="md-ul" {...props} />,
         ol: (props) => <ol className="md-ol" {...props} />,
         li: (props) => <li className="md-li" data-line={props.node?.position?.start?.line} {...props} />,
-        code: ({ inline, ...props }) =>
-            inline ?
-                <code className="md-code-inline" {...props} /> :
-                <code className="md-code-block" {...props} />,
-        pre: (props) => <pre className="md-pre" data-line={props.node?.position?.start?.line} {...props} />,
+        code: ({ inline, className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || '');
+            const language = match ? match[1] : '';
+
+            return !inline ? (
+                <SyntaxHighlighter
+                    style={prism}
+                    language={language || 'text'}
+                    PreTag="div"
+                    className="md-code-block"
+                    customStyle={{
+                        margin: '0.4em 0',
+                        padding: '0.6em',
+                        fontSize: '0.75em',
+                        borderRadius: '4px',
+                        lineHeight: '1.4',
+                        background: '#f8f8f8',
+                        border: '1px solid #ddd',
+                    }}
+                    codeTagProps={{
+                        style: {
+                            fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+                        }
+                    }}
+                    {...props}
+                >
+                    {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+            ) : (
+                <code className="md-code-inline" {...props}>
+                    {children}
+                </code>
+            );
+        },
+        pre: (props) => <div className="md-pre" data-line={props.node?.position?.start?.line} {...props} />,
         blockquote: (props) => <blockquote className="md-blockquote" data-line={props.node?.position?.start?.line} {...props} />,
         table: (props) => <table className="md-table" data-line={props.node?.position?.start?.line} {...props} />,
         thead: (props) => <thead className="md-thead" {...props} />,
@@ -143,6 +176,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         strong: (props) => <strong className="md-strong" {...props} />,
         em: (props) => <em className="md-em" {...props} />,
         hr: (props) => <hr className="md-hr" {...props} />,
+        img: (props) => <img className="md-img" data-line={props.node?.position?.start?.line} {...props} />,
     };
 
     return (
@@ -181,7 +215,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     className="md-measurer"
                 >
                     <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
+                        remarkPlugins={[remarkMath, remarkGfm]}
                         rehypePlugins={[rehypeKatex]}
                         components={components}
                     >

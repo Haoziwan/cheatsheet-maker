@@ -140,20 +140,29 @@
 }
 
 .preview-page .md-pre {
-    background: #f8f8f8;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 0.5em;
     margin: 0.4em 0;
-    overflow-x: auto;
     break-inside: avoid;
+    overflow: visible;
 }
 
 .preview-page .md-code-block {
     font-family: 'JetBrains Mono', 'Courier New', monospace;
-    font-size: 0.85em;
-    line-height: 1.4;
-    color: #333;
+    font-size: 0.75em !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.preview-page .md-code-block pre {
+    margin: 0 !important;
+    padding: 0.6em !important;
+    background: #f8f8f8 !important;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .preview-page .md-blockquote {
@@ -166,10 +175,12 @@
 
 .preview-page .md-table {
     border-collapse: collapse;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     margin: 0.4em 0;
-    font-size: 0.9em;
+    font-size: 0.85em;
     break-inside: avoid;
+    table-layout: auto;
 }
 
 .preview-page .md-th,
@@ -177,11 +188,19 @@
     border: 1px solid #ddd;
     padding: 0.3em 0.5em;
     text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .preview-page .md-th {
     background: #f0f0f0;
     font-weight: 600;
+    white-space: nowrap;
+}
+
+.preview-page .md-td {
+    max-width: 200px;
 }
 
 .preview-page .md-tr:nth-child(even) {
@@ -214,6 +233,16 @@
     margin: 0.5em 0;
 }
 
+.preview-page .md-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.5em auto;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+}
+
 /* KaTeX Math Styling */
 .preview-page .katex {
     font-size: 1em;
@@ -234,11 +263,11 @@
 .preview-page h6,
 .preview-page pre,
 .preview-page table,
+.preview-page img,
 .preview-page .katex-display {
     break-inside: avoid;
 }
 
-/* Print optimization */
 /* Print optimization */
 @media print {
     @page {
