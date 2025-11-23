@@ -7,10 +7,11 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import themes from '../styles/themes';
+import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, onLineClick }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, fontFamily, onLineClick }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -39,6 +40,22 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             }
         }
     };
+
+    // Load Google Fonts if needed
+    useEffect(() => {
+        const selectedFont = fonts[fontFamily];
+        if (selectedFont?.googleFont) {
+            const linkId = `google-font-${fontFamily}`;
+            // Check if font is already loaded
+            if (!document.getElementById(linkId)) {
+                const link = document.createElement('link');
+                link.id = linkId;
+                link.rel = 'stylesheet';
+                link.href = `https://fonts.googleapis.com/css2?family=${selectedFont.googleFont}&display=swap`;
+                document.head.appendChild(link);
+            }
+        }
+    }, [fontFamily]);
 
     useEffect(() => {
         const measureEl = measureRef.current;
@@ -98,6 +115,10 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 page.style.color = currentTheme.cssVars['--theme-text'];
             }
 
+            // Apply font family
+            const selectedFont = fonts[fontFamily] || fonts['times-new-roman'];
+            page.style.fontFamily = selectedFont.family;
+
             const grid = document.createElement('div');
             grid.className = 'page-columns';
             grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
@@ -140,7 +161,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 }
             }
         });
-    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme]);
+    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily]);
 
     // Custom components to inject source line numbers and apply theme styles
     const currentTheme = themes[theme] || themes.classic;

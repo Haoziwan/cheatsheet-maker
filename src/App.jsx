@@ -89,6 +89,7 @@ function App() {
   const [scale, setScale] = useState(0.6); // Don't persist scale, start with a reasonable default
   const [orientation, setOrientation] = useLocalStorage('cheatsheet_orientation', 'landscape');
   const [theme, setTheme] = useLocalStorage('cheatsheet_theme', 'classic');
+  const [fontFamily, setFontFamily] = useLocalStorage('cheatsheet_fontFamily', 'inter');
   const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
@@ -134,6 +135,8 @@ function App() {
         setOrientation={setOrientation}
         theme={theme}
         setTheme={setTheme}
+        fontFamily={fontFamily}
+        setFontFamily={setFontFamily}
         previewRef={previewRef}
       />
       <div className="main-content">
@@ -185,6 +188,7 @@ function App() {
             setScale={setScale}
             orientation={orientation}
             theme={theme}
+            fontFamily={fontFamily}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
           />
         </div>

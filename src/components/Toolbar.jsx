@@ -1,5 +1,6 @@
 import { Download, Github, RectangleHorizontal, RectangleVertical } from 'lucide-react';
 import themes from '../styles/themes';
+import fonts from '../styles/fonts';
 import './Toolbar.css';
 
 function Toolbar({
@@ -10,6 +11,7 @@ function Toolbar({
     lineHeight, setLineHeight,
     orientation, setOrientation,
     theme, setTheme,
+    fontFamily, setFontFamily,
     previewRef
 }) {
     const handleExportPDF = () => {
@@ -41,6 +43,21 @@ function Toolbar({
                         {Object.entries(themes).map(([key, themeData]) => (
                             <option key={key} value={key}>
                                 {themeData.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="toolbar-control">
+                    <label className="label">Font</label>
+                    <select
+                        value={fontFamily}
+                        onChange={(e) => setFontFamily(e.target.value)}
+                        className="select"
+                    >
+                        {Object.entries(fonts).map(([key, fontData]) => (
+                            <option key={key} value={key}>
+                                {fontData.name}
                             </option>
                         ))}
                     </select>
