@@ -7,38 +7,75 @@ import './App.css';
 const defaultMarkdown = `# Markdown Cheatsheet
 
 ## Headers
-# H1 Header
-## H2 Header
-### H3 Header
+# H1
+## H2
+### H3
+#### H4
+##### H5
+###### H6
 
-## Text Formatting
-**Bold text** and *italic text*
+## Emphasis
+**Bold** or __Bold__
+*Italic* or _Italic_
+***Bold Italic***
 ~~Strikethrough~~
 
 ## Lists
+### Unordered
 - Item 1
 - Item 2
-  - Nested item
+  - Sub Item 2a
+  - Sub Item 2b
 
+### Ordered
 1. First
 2. Second
+3. Third
 
-## Math Formulas
-Inline math: $E = mc^2$
+### Task List
+- [x] Done task
+- [ ] Todo task
 
-Block math:
-$$
-\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}
-$$
+## Links & Images
+[Link Text](https://example.com)
+![Image Alt](https://picsum.photos/150/100)
 
-## Links
-[Link text](https://example.com)
+## Code
+Inline \`code\` example.
+
+\`\`\`javascript
+// Code block
+function hello() {
+  console.log("Hello World");
+}
+\`\`\`
+
+## Tables
+| Header 1 | Header 2 |
+| :------- | :------- |
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
 
 ## Blockquotes
-> This is a quote
+> This is a blockquote.
+>
+> > Nested blockquote.
+
+## Math (KaTeX)
+Inline: $E = mc^2$
+
+Block:
+$$
+\\oint_C \\vec{B} \\cdot d\\vec{l} = \\mu_0 I_{enc}
+$$
 
 ## Horizontal Rule
 ---
+
+## Footnotes
+Here is a footnote reference[^1].
+
+[^1]: Here is the footnote.
 `;
 
 function App() {
