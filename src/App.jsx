@@ -47,6 +47,7 @@ function App() {
   const [fontSize, setFontSize] = useState(8);
   const [padding, setPadding] = useState(3); // mm
   const [gap, setGap] = useState(1); // mm
+  const [lineHeight, setLineHeight] = useState(1.2);
   const [scale, setScale] = useState(0.6);
   const [splitSize, setSplitSize] = useState(50);
   const previewRef = useRef(null);
@@ -85,6 +86,8 @@ function App() {
         setPadding={setPadding}
         gap={gap}
         setGap={setGap}
+        lineHeight={lineHeight}
+        setLineHeight={setLineHeight}
         scale={scale}
         setScale={setScale}
         previewRef={previewRef}
@@ -133,6 +136,7 @@ function App() {
             fontSize={fontSize}
             padding={padding}
             gap={gap}
+            lineHeight={lineHeight}
             scale={scale}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
           />

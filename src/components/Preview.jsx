@@ -5,7 +5,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale, onLineClick }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, onLineClick }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -52,6 +52,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale, 
         // Prepare measurer styles
         measureEl.style.width = `${columnWidthPx - gapPx}px`;
         measureEl.style.fontSize = `${fontSize}pt`;
+        measureEl.style.lineHeight = lineHeight;
         measureEl.style.paddingLeft = `${gap / 2}mm`;
         measureEl.style.paddingRight = `${gap / 2}mm`;
 
@@ -67,6 +68,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale, 
             const page = document.createElement('div');
             page.className = 'preview-page';
             page.style.fontSize = `${fontSize}pt`;
+            page.style.lineHeight = lineHeight;
             page.style.padding = `${padding}mm`;
 
             const grid = document.createElement('div');
@@ -111,7 +113,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale, 
                 }
             }
         });
-    }, [markdown, columns, fontSize, padding, gap]);
+    }, [markdown, columns, fontSize, padding, gap, lineHeight]);
 
     // Custom components to inject source line numbers
     const components = {
@@ -148,7 +150,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, scale, 
             <div className="preview-header">
                 <span className="preview-title">PDF Preview</span>
                 <span className="preview-info">
-                    {columns} columns · {fontSize}pt · {padding}mm pad · {gap}mm gap
+                    {columns} columns · {fontSize}pt · {padding}mm pad · {gap}mm gap · {lineHeight} line height
                 </span>
             </div>
             <div className="preview-content">

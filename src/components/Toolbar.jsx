@@ -6,6 +6,7 @@ function Toolbar({
     fontSize, setFontSize,
     padding, setPadding,
     gap, setGap,
+    lineHeight, setLineHeight,
     scale, setScale,
     previewRef
 }) {
@@ -72,6 +73,19 @@ function Toolbar({
                         max="20"
                         value={gap}
                         onChange={(e) => setGap(Number(e.target.value))}
+                        className="number-input"
+                    />
+                </div>
+
+                <div className="toolbar-control">
+                    <label className="label">Line Height</label>
+                    <input
+                        type="number"
+                        min="0.8"
+                        max="2.5"
+                        step="0.1"
+                        value={lineHeight}
+                        onChange={(e) => setLineHeight(Number(e.target.value))}
                         className="number-input"
                     />
                 </div>
