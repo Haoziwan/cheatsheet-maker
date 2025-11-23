@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import { Eye, Edit3, Columns, Download } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
+import MermaidDiagram from './MermaidDiagram';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
 
@@ -74,6 +75,31 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
         blockquote: ({ node, ...props }) => <blockquote data-line={node?.position?.start?.line} {...props} />,
         pre: ({ node, ...props }) => <pre data-line={node?.position?.start?.line} {...props} />,
         table: ({ node, ...props }) => <table data-line={node?.position?.start?.line} {...props} />,
+        code: ({ node, inline, className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || '');
+            const language = match ? match[1] : '';
+
+            // Check if it's a mermaid diagram
+            if (!inline && language === 'mermaid') {
+                return (
+                    <MermaidDiagram
+                        chart={String(children).replace(/\n$/, '')}
+                        dataLine={node?.position?.start?.line}
+                    />
+                );
+            }
+
+            // Default code rendering
+            return inline ? (
+                <code className={className} {...props}>
+                    {children}
+                </code>
+            ) : (
+                <code className={className} {...props}>
+                    {children}
+                </code>
+            );
+        },
     };
 
     return (

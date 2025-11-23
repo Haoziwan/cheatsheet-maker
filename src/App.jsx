@@ -77,6 +77,17 @@ $$
 Here is a footnote reference[^1].
 
 [^1]: Here is the footnote.
+
+## Chart
+
+` + '```mermaid' + `
+pie title Programming Languages Usage
+    "JavaScript" : 35
+    "Python" : 25
+    "Java" : 20
+    "C++" : 12
+    "Others" : 8
+` + '```' + `
 `;
 
 function App() {

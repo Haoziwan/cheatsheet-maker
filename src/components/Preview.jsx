@@ -6,6 +6,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import MermaidDiagram from './MermaidDiagram';
 import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
@@ -292,13 +293,23 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         ul: (props) => <ul className="md-ul" {...props} />,
         ol: (props) => <ol className="md-ol" {...props} />,
         li: (props) => <li className="md-li" data-line={props.node?.position?.start?.line} {...props} />,
-        code: ({ inline, className, children, ...props }) => {
+        code: ({ inline, className, children, node, ...props }) => {
             const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';
 
             // Heuristic: It's a block if it has a language or contains newlines
             // (Markdown inline code newlines are normalized to spaces)
             const isBlock = match || String(children).includes('\n');
+
+            // Check if it's a mermaid diagram
+            if (!inline && language === 'mermaid') {
+                return (
+                    <MermaidDiagram
+                        chart={String(children).replace(/\n$/, '')}
+                        dataLine={node?.position?.start?.line}
+                    />
+                );
+            }
 
             return isBlock ? (
                 <SyntaxHighlighter
@@ -413,7 +424,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     <button className="icon-btn" onClick={() => setScale(s => Math.min(s + 0.1, 3))} title="Zoom In">
                         <ZoomIn size={16} />
                     </button>
-                    <button className="icon-btn" onClick={handleManualUpdate} title="Manual Update">
+                    <button className="icon-btn" onClick={handleManualUpdate} title="Manual Update (Click if loading failed)">
                         <RefreshCw size={14} />
                     </button>
                 </div>
