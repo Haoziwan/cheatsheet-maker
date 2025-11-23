@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
-import { Eye, Edit3, Columns } from 'lucide-react';
+import { Eye, Edit3, Columns, Download } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
@@ -106,6 +106,23 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                         title="Preview Only"
                     >
                         <Eye size={14} />
+                    </button>
+                    <button
+                        className="editor-download-btn"
+                        onClick={() => {
+                            const blob = new Blob([markdown], { type: 'text/markdown' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'cheatsheet.md';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        }}
+                        title="Download Markdown"
+                    >
+                        <Download size={14} />
                     </button>
                 </div>
             </div>
