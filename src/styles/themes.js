@@ -322,6 +322,7 @@ export const themes = {
                 background: '#2a2a2a',
                 border: '1px solid #404040',
                 borderRadius: '6px',
+                textShadow: 'none',
             },
             link: {
                 color: '#ffffff',
@@ -598,6 +599,7 @@ export const themes = {
                 border: '1px solid #00ff9f',
                 borderRadius: '6px',
                 boxShadow: '0 0 10px rgba(0, 255, 159, 0.2)',
+                textShadow: 'none',
             },
             link: {
                 color: '#00d4ff',

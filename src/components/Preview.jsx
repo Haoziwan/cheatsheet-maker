@@ -60,7 +60,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     useEffect(() => {
         // 只有当实时更新开启时才执行渲染逻辑
         if (!liveUpdate) return;
-        
+
         const measureEl = measureRef.current;
         if (!measureEl) return;
 
@@ -296,7 +296,11 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';
 
-            return !inline ? (
+            // Heuristic: It's a block if it has a language or contains newlines
+            // (Markdown inline code newlines are normalized to spaces)
+            const isBlock = match || String(children).includes('\n');
+
+            return isBlock ? (
                 <SyntaxHighlighter
                     style={prism}
                     language={language || 'text'}
@@ -374,11 +378,11 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 <div className="preview-header-left">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span className="preview-title">PDF Preview</span>
-                        <button 
+                        <button
                             className={`icon-btn ${liveUpdate ? 'active' : ''}`}
                             onClick={() => setLiveUpdate(!liveUpdate)}
                             title={liveUpdate ? "Disable live update" : "Enable live update"}
-                            style={{ 
+                            style={{
                                 backgroundColor: liveUpdate ? 'var(--color-accent-primary)' : '#e0e0e0',
                                 color: liveUpdate ? 'white' : '#666',
                                 display: 'flex',

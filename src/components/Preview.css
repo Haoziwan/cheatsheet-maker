@@ -121,6 +121,7 @@
 .preview-page .md-ol {
     margin: 0.3em 0;
     padding-left: 1.5em;
+    overflow: visible;
 }
 
 .preview-page .md-li {
@@ -128,13 +129,13 @@
 }
 
 .preview-page .md-code-inline {
-    background: #f0f0f0;
+    background: var(--theme-code-bg, #f0f0f0);
     padding: 0.1em 0.3em;
     border-radius: 3px;
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     font-size: 0.9em;
-    color: #c7254e;
-    border: 1px solid #e0e0e0;
+    color: var(--theme-code-text, #c7254e);
+    border: 1px solid var(--theme-border, #e0e0e0);
 }
 
 .preview-page .md-pre {
