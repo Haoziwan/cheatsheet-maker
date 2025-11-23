@@ -94,7 +94,7 @@ function App() {
   const [markdown, setMarkdown] = useLocalStorage('cheatsheet_markdown', defaultMarkdown);
   const [columns, setColumns] = useLocalStorage('cheatsheet_columns', 5);
   const [fontSize, setFontSize] = useLocalStorage('cheatsheet_fontSize', 8);
-  const [padding, setPadding] = useLocalStorage('cheatsheet_padding', 3); // mm
+  const [padding, setPadding] = useLocalStorage('cheatsheet_padding', 5); // mm
   const [gap, setGap] = useLocalStorage('cheatsheet_gap', 1); // mm
   const [lineHeight, setLineHeight] = useLocalStorage('cheatsheet_lineHeight', 1.2);
   const [scale, setScale] = useState(0.6); // Don't persist scale, start with a reasonable default
@@ -111,7 +111,7 @@ function App() {
   const defaultValues = {
     columns: 5,
     fontSize: 8,
-    padding: 3,
+    padding: 5,
     gap: 1,
     lineHeight: 1.2,
     orientation: 'landscape',

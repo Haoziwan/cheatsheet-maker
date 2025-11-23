@@ -15,6 +15,7 @@ import './Preview.css';
 const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, fontFamily, onLineClick, liveUpdate, setLiveUpdate }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
+    const layoutTimeoutRef = useRef(null);
 
     const pxPerMmRef = useRef(null);
     const mmToPx = (mm) => {
@@ -58,7 +59,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         }
     }, [fontFamily]);
 
-    useEffect(() => {
+    const updateLayout = () => {
         // 只有当实时更新开启时才执行渲染逻辑
         if (!liveUpdate) return;
 
@@ -165,7 +166,21 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 }
             }
         });
+    };
+
+    useEffect(() => {
+        updateLayout();
     }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, liveUpdate]);
+
+    const handleResourceLoad = () => {
+        // Debounce layout updates from resource loading (images, mermaid)
+        if (layoutTimeoutRef.current) {
+            clearTimeout(layoutTimeoutRef.current);
+        }
+        layoutTimeoutRef.current = setTimeout(() => {
+            updateLayout();
+        }, 100);
+    };
 
     // 手动更新函数
     const handleManualUpdate = () => {
@@ -307,6 +322,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     <MermaidDiagram
                         chart={String(children).replace(/\n$/, '')}
                         dataLine={node?.position?.start?.line}
+                        onRender={handleResourceLoad}
                     />
                 );
             }
@@ -380,7 +396,15 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         },
         em: (props) => <em className="md-em" {...props} />,
         hr: (props) => <hr className="md-hr" {...props} />,
-        img: (props) => <img className="md-img" data-line={props.node?.position?.start?.line} {...props} />,
+        img: (props) => (
+            <img
+                className="md-img"
+                data-line={props.node?.position?.start?.line}
+                onLoad={handleResourceLoad}
+                onError={handleResourceLoad}
+                {...props}
+            />
+        ),
     };
 
     return (
