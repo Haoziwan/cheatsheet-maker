@@ -91,6 +91,7 @@ function App() {
   const [theme, setTheme] = useLocalStorage('cheatsheet_theme', 'classic');
   const [fontFamily, setFontFamily] = useLocalStorage('cheatsheet_fontFamily', 'inter');
   const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
+  const [liveUpdate, setLiveUpdate] = useState(true); // 控制PDF预览的实时更新
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
   const editorRef = useRef(null);
@@ -211,6 +212,8 @@ function App() {
             theme={theme}
             fontFamily={fontFamily}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
+            liveUpdate={liveUpdate}
+            setLiveUpdate={setLiveUpdate}
           />
         </div>
       </div>

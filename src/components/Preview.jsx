@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -11,7 +11,7 @@ import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, fontFamily, onLineClick }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, fontFamily, onLineClick, liveUpdate, setLiveUpdate }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -58,6 +58,9 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     }, [fontFamily]);
 
     useEffect(() => {
+        // 只有当实时更新开启时才执行渲染逻辑
+        if (!liveUpdate) return;
+        
         const measureEl = measureRef.current;
         if (!measureEl) return;
 
@@ -161,7 +164,115 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 }
             }
         });
-    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily]);
+    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, liveUpdate]);
+
+    // 手动更新函数
+    const handleManualUpdate = () => {
+        // 强制重新渲染，即使实时更新关闭
+        const measureEl = measureRef.current;
+        if (!measureEl) return;
+
+        // Compute column width/height in px based on A4 landscape and current paddings/gaps
+        const isLandscape = orientation === 'landscape';
+        const widthMm = isLandscape ? 297 : 210;
+        const heightMm = isLandscape ? 210 : 297;
+
+        const pageWidthPx = mmToPx(widthMm);
+        const pageHeightPx = mmToPx(heightMm);
+        const paddingPx = mmToPx(padding);
+        const gapPx = mmToPx(gap);
+        const contentWidthPx = pageWidthPx - paddingPx * 2;
+        const totalPaddingPx = gapPx * columns; // Total padding for all columns
+        const columnWidthPx = (contentWidthPx - totalPaddingPx) / columns;
+        const columnHeightPx = pageHeightPx - paddingPx * 2;
+
+        // Prepare measurer styles
+        measureEl.style.width = `${columnWidthPx - gapPx}px`;
+        measureEl.style.fontSize = `${fontSize}pt`;
+        measureEl.style.lineHeight = lineHeight;
+        measureEl.style.paddingLeft = `${gap / 2}mm`;
+        measureEl.style.paddingRight = `${gap / 2}mm`;
+
+        const container = pagesContainerRef.current;
+        if (!container) return;
+        container.innerHTML = '';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.gap = '12mm';
+        const children = Array.from(measureEl.children);
+
+        const createPage = () => {
+            const page = document.createElement('div');
+            page.className = 'preview-page';
+            page.style.width = `${widthMm}mm`;
+            page.style.height = `${heightMm}mm`;
+            page.style.fontSize = `${fontSize}pt`;
+            page.style.lineHeight = lineHeight;
+            page.style.padding = `${padding}mm`;
+
+            // Apply theme
+            const currentTheme = themes[theme] || themes.classic;
+            if (currentTheme.cssVars) {
+                Object.entries(currentTheme.cssVars).forEach(([key, value]) => {
+                    page.style.setProperty(key, value);
+                });
+            }
+
+            // Apply background and text colors
+            if (currentTheme.cssVars['--theme-bg']) {
+                page.style.background = currentTheme.cssVars['--theme-bg'];
+            }
+            if (currentTheme.cssVars['--theme-text']) {
+                page.style.color = currentTheme.cssVars['--theme-text'];
+            }
+
+            // Apply font family
+            const selectedFont = fonts[fontFamily] || fonts['times-new-roman'];
+            page.style.fontFamily = selectedFont.family;
+
+            const grid = document.createElement('div');
+            grid.className = 'page-columns';
+            grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            grid.style.gap = '0mm'; // Remove gap as we'll use padding instead
+
+            const cols = [];
+            for (let i = 0; i < columns; i++) {
+                const col = document.createElement('div');
+                col.className = 'page-column';
+                col.style.height = `${columnHeightPx}px`;
+                col.style.paddingLeft = `${gap / 2}mm`;
+                col.style.paddingRight = `${gap / 2}mm`;
+                grid.appendChild(col);
+                cols.push(col);
+            }
+
+            page.appendChild(grid);
+            container.appendChild(page);
+            return cols;
+        };
+
+        let cols = createPage();
+        let colIndex = 0;
+
+        children.forEach((child) => {
+            const node = child.cloneNode(true);
+            cols[colIndex].appendChild(node);
+            const overflow = cols[colIndex].scrollHeight > cols[colIndex].clientHeight;
+            if (overflow) {
+                cols[colIndex].removeChild(node);
+                colIndex += 1;
+                if (colIndex >= columns) {
+                    cols = createPage();
+                    colIndex = 0;
+                }
+                cols[colIndex].appendChild(node);
+                // If still overflow, the block is taller than a single column; allow it to overflow within a fresh column to avoid clipping
+                if (cols[colIndex].scrollHeight > cols[colIndex].clientHeight) {
+                    cols[colIndex].style.overflow = 'visible';
+                }
+            }
+        });
+    };
 
     // Custom components to inject source line numbers and apply theme styles
     const currentTheme = themes[theme] || themes.classic;
@@ -261,7 +372,31 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         <div className="preview">
             <div className="preview-header">
                 <div className="preview-header-left">
-                    <span className="preview-title">PDF Preview</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="preview-title">PDF Preview</span>
+                        <button 
+                            className={`icon-btn ${liveUpdate ? 'active' : ''}`}
+                            onClick={() => setLiveUpdate(!liveUpdate)}
+                            title={liveUpdate ? "Disable live update" : "Enable live update"}
+                            style={{ 
+                                backgroundColor: liveUpdate ? 'var(--color-accent-primary)' : '#e0e0e0',
+                                color: liveUpdate ? 'white' : '#666',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 'auto',
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            {liveUpdate ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
                     <span className="preview-info">
                         {columns} cols · {fontSize}pt · {padding}mm pad · {gap}mm gap
                     </span>
@@ -274,8 +409,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     <button className="icon-btn" onClick={() => setScale(s => Math.min(s + 0.1, 3))} title="Zoom In">
                         <ZoomIn size={16} />
                     </button>
-                    <button className="icon-btn" onClick={() => setScale(1)} title="Reset Zoom">
-                        <RotateCcw size={14} />
+                    <button className="icon-btn" onClick={handleManualUpdate} title="Manual Update">
+                        <RefreshCw size={14} />
                     </button>
                 </div>
             </div>
