@@ -95,6 +95,18 @@ function App() {
   const previewContainerRef = useRef(null);
   const editorRef = useRef(null);
 
+  // 定义默认值常量
+  const defaultValues = {
+    columns: 5,
+    fontSize: 8,
+    padding: 3,
+    gap: 1,
+    lineHeight: 1.2,
+    orientation: 'landscape',
+    theme: 'classic',
+    fontFamily: 'inter'
+  };
+
   useEffect(() => {
     const handleWheel = (e) => {
       if (e.ctrlKey) {
@@ -138,6 +150,15 @@ function App() {
         fontFamily={fontFamily}
         setFontFamily={setFontFamily}
         previewRef={previewRef}
+        // 传递默认值
+        defaultColumns={defaultValues.columns}
+        defaultFontSize={defaultValues.fontSize}
+        defaultPadding={defaultValues.padding}
+        defaultGap={defaultValues.gap}
+        defaultLineHeight={defaultValues.lineHeight}
+        defaultOrientation={defaultValues.orientation}
+        defaultTheme={defaultValues.theme}
+        defaultFontFamily={defaultValues.fontFamily}
       />
       <div className="main-content">
         <div className="editor-panel" style={{ width: `${splitSize}%` }}>

@@ -121,6 +121,15 @@
     background: var(--color-primary-dark);
 }
 
+.btn-reset {
+    padding: 4px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .orientation-toggle {
     display: flex;
     gap: 4px;

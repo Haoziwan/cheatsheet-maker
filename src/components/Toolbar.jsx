@@ -1,4 +1,4 @@
-import { Download, Github, RectangleHorizontal, RectangleVertical } from 'lucide-react';
+import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw } from 'lucide-react';
 import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import './Toolbar.css';
@@ -12,13 +12,34 @@ function Toolbar({
     orientation, setOrientation,
     theme, setTheme,
     fontFamily, setFontFamily,
-    previewRef
+    previewRef,
+    // 添加reset功能所需的默认值
+    defaultColumns,
+    defaultFontSize,
+    defaultPadding,
+    defaultGap,
+    defaultLineHeight,
+    defaultOrientation,
+    defaultTheme,
+    defaultFontFamily
 }) {
     const handleExportPDF = () => {
         // Trigger browser print dialog
         // The @media print styles in Preview.css will handle the layout
         // to ensure only the preview pages are printed in A4 landscape
         window.print();
+    };
+
+    // 添加reset功能
+    const handleReset = () => {
+        setColumns(defaultColumns);
+        setFontSize(defaultFontSize);
+        setPadding(defaultPadding);
+        setGap(defaultGap);
+        setLineHeight(defaultLineHeight);
+        setOrientation(defaultOrientation);
+        setTheme(defaultTheme);
+        setFontFamily(defaultFontFamily);
     };
 
     return (
@@ -144,7 +165,13 @@ function Toolbar({
                     </div>
                 </div>
 
-
+                <button
+                    className="btn btn-secondary btn-reset"
+                    onClick={handleReset}
+                    title="Reset to default settings"
+                >
+                    <RotateCcw size={16} />
+                </button>
             </div>
 
             <div className="toolbar-right">
