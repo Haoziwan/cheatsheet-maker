@@ -138,6 +138,7 @@ function App() {
             gap={gap}
             lineHeight={lineHeight}
             scale={scale}
+            setScale={setScale}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
           />
         </div>

@@ -55,14 +55,17 @@
 
 .toolbar-control {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
 }
 
 .label {
-    font-size: 0.875rem;
+    font-size: 0.7rem;
     color: var(--color-text-secondary);
     white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .select {
@@ -93,42 +96,6 @@
 
 .number-input:focus {
     border-color: var(--color-primary);
-}
-
-.zoom-control {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--color-bg-primary);
-    padding: 4px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-}
-
-.zoom-label {
-    font-size: 0.75rem;
-    min-width: 40px;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-}
-
-.icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: none;
-    background: transparent;
-    color: var(--color-text-secondary);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    padding: 0;
-}
-
-.icon-btn:hover {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
 }
 
 .btn {

@@ -1,4 +1,4 @@
-import { Download, Github, Settings, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Download, Github } from 'lucide-react';
 import './Toolbar.css';
 
 function Toolbar({
@@ -7,7 +7,6 @@ function Toolbar({
     padding, setPadding,
     gap, setGap,
     lineHeight, setLineHeight,
-    scale, setScale,
     previewRef
 }) {
     const handleExportPDF = () => {
@@ -90,18 +89,7 @@ function Toolbar({
                     />
                 </div>
 
-                <div className="toolbar-control zoom-control">
-                    <button className="icon-btn" onClick={() => setScale(s => Math.max(s - 0.1, 0.5))} title="Zoom Out">
-                        <ZoomOut size={16} />
-                    </button>
-                    <span className="zoom-label">{Math.round(scale * 100)}%</span>
-                    <button className="icon-btn" onClick={() => setScale(s => Math.min(s + 0.1, 3))} title="Zoom In">
-                        <ZoomIn size={16} />
-                    </button>
-                    <button className="icon-btn" onClick={() => setScale(1)} title="Reset Zoom">
-                        <RotateCcw size={14} />
-                    </button>
-                </div>
+
             </div>
 
             <div className="toolbar-right">

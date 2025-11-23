@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useRef } from 'react';
+import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -8,7 +9,7 @@ import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, onLineClick }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, onLineClick }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -182,10 +183,24 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     return (
         <div className="preview">
             <div className="preview-header">
-                <span className="preview-title">PDF Preview</span>
-                <span className="preview-info">
-                    {columns} columns · {fontSize}pt · {padding}mm pad · {gap}mm gap · {lineHeight} line height
-                </span>
+                <div className="preview-header-left">
+                    <span className="preview-title">PDF Preview</span>
+                    <span className="preview-info">
+                        {columns} cols · {fontSize}pt · {padding}mm pad · {gap}mm gap
+                    </span>
+                </div>
+                <div className="preview-controls">
+                    <button className="icon-btn" onClick={() => setScale(s => Math.max(s - 0.1, 0.5))} title="Zoom Out">
+                        <ZoomOut size={16} />
+                    </button>
+                    <span className="zoom-label">{Math.round(scale * 100)}%</span>
+                    <button className="icon-btn" onClick={() => setScale(s => Math.min(s + 0.1, 3))} title="Zoom In">
+                        <ZoomIn size={16} />
+                    </button>
+                    <button className="icon-btn" onClick={() => setScale(1)} title="Reset Zoom">
+                        <RotateCcw size={14} />
+                    </button>
+                </div>
             </div>
             <div className="preview-content">
                 <div
