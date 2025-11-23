@@ -2,7 +2,8 @@
 
 A React-based application for creating and exporting cheatsheets as PDF documents using Markdown.
 
-<img width="1894" height="996" alt="image" src="https://github.com/user-attachments/assets/e1d0a664-cbd9-4b77-83e7-2ae3b2012e77" />
+<img width="1875" height="1014" alt="image" src="https://github.com/user-attachments/assets/41151eb6-f043-46bf-9ac5-9b07d5018510" />
+
 
 
 ## Features
