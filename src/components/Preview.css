@@ -219,7 +219,7 @@
 
 .preview-page .md-strong {
     font-weight: 700;
-    color: #d35400; /* Orange color for bold text */
+    color: inherit;
 }
 
 .preview-page .md-em {

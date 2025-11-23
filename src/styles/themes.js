@@ -70,6 +70,13 @@ export const themes = {
                 color: '#555',
                 fontStyle: 'italic',
             },
+            strong: {
+                fontWeight: '700',
+                color: '#000000',
+            },
+            paragraph: {
+                color: '#1a1a1a',
+            },
             table: {
                 borderColor: '#ddd',
                 headerBg: '#f0f0f0',
@@ -157,6 +164,13 @@ export const themes = {
                 padding: '0.5em 0.8em',
                 borderRadius: '0 4px 4px 0',
             },
+            strong: {
+                fontWeight: '700',
+                color: '#0f172a',
+            },
+            paragraph: {
+                color: '#1e293b',
+            },
             table: {
                 borderColor: '#e2e8f0',
                 headerBg: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)',
@@ -234,6 +248,13 @@ export const themes = {
                 paddingLeft: '0.8em',
                 color: '#6b7280',
                 fontStyle: 'normal',
+            },
+            strong: {
+                fontWeight: '700',
+                color: '#111827',
+            },
+            paragraph: {
+                color: '#374151',
             },
             table: {
                 borderColor: '#e5e7eb',
@@ -406,6 +427,13 @@ export const themes = {
                 padding: '0.5em 0.8em',
                 borderRadius: '0 4px 4px 0',
             },
+            strong: {
+                fontWeight: '800',
+                color: '#dc2626',
+            },
+            paragraph: {
+                color: '#1f2937',
+            },
             table: {
                 borderColor: '#fde68a',
                 headerBg: 'linear-gradient(135deg, #fef3c7 0%, #ddd6fe 100%)',
@@ -488,6 +516,13 @@ export const themes = {
                 color: '#4a5568',
                 fontStyle: 'italic',
                 fontFamily: 'Georgia, serif',
+            },
+            strong: {
+                fontWeight: '700',
+                color: '#1a202c',
+            },
+            paragraph: {
+                color: '#2d3748',
             },
             table: {
                 borderColor: '#cbd5e0',
