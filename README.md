@@ -12,7 +12,7 @@ A React-based application for creating and exporting cheatsheets as PDF document
 - PDF export via browser print functionality
 - Customizable multi-column layout settings
 - Mathematical expressions with KaTeX
-
+- Automatic saving using localStorage
 
 ## Tech Stack
 

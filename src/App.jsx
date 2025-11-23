@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
+import { useLocalStorage } from './utils/useLocalStorage';
 import './App.css';
 
 const defaultMarkdown = `# Markdown Cheatsheet
@@ -79,15 +80,15 @@ Here is a footnote reference[^1].
 `;
 
 function App() {
-  const [markdown, setMarkdown] = useState(defaultMarkdown);
-  const [columns, setColumns] = useState(5);
-  const [fontSize, setFontSize] = useState(8);
-  const [padding, setPadding] = useState(3); // mm
-  const [gap, setGap] = useState(1); // mm
-  const [lineHeight, setLineHeight] = useState(1.2);
-  const [scale, setScale] = useState(0.6);
-  const [orientation, setOrientation] = useState('landscape');
-  const [splitSize, setSplitSize] = useState(50);
+  const [markdown, setMarkdown] = useLocalStorage('cheatsheet_markdown', defaultMarkdown);
+  const [columns, setColumns] = useLocalStorage('cheatsheet_columns', 5);
+  const [fontSize, setFontSize] = useLocalStorage('cheatsheet_fontSize', 8);
+  const [padding, setPadding] = useLocalStorage('cheatsheet_padding', 3); // mm
+  const [gap, setGap] = useLocalStorage('cheatsheet_gap', 1); // mm
+  const [lineHeight, setLineHeight] = useLocalStorage('cheatsheet_lineHeight', 1.2);
+  const [scale, setScale] = useState(0.6); // Don't persist scale, start with a reasonable default
+  const [orientation, setOrientation] = useLocalStorage('cheatsheet_orientation', 'landscape');
+  const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
   const editorRef = useRef(null);
