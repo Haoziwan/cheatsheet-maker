@@ -9,7 +9,7 @@ import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, onLineClick }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, onLineClick }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
 
@@ -44,8 +44,12 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         if (!measureEl) return;
 
         // Compute column width/height in px based on A4 landscape and current paddings/gaps
-        const pageWidthPx = mmToPx(297);
-        const pageHeightPx = mmToPx(210);
+        const isLandscape = orientation === 'landscape';
+        const widthMm = isLandscape ? 297 : 210;
+        const heightMm = isLandscape ? 210 : 297;
+
+        const pageWidthPx = mmToPx(widthMm);
+        const pageHeightPx = mmToPx(heightMm);
         const paddingPx = mmToPx(padding);
         const gapPx = mmToPx(gap);
         const contentWidthPx = pageWidthPx - paddingPx * 2;
@@ -71,6 +75,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         const createPage = () => {
             const page = document.createElement('div');
             page.className = 'preview-page';
+            page.style.width = `${widthMm}mm`;
+            page.style.height = `${heightMm}mm`;
             page.style.fontSize = `${fontSize}pt`;
             page.style.lineHeight = lineHeight;
             page.style.padding = `${padding}mm`;
@@ -117,7 +123,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 }
             }
         });
-    }, [markdown, columns, fontSize, padding, gap, lineHeight]);
+    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation]);
 
     // Custom components to inject source line numbers
     const components = {
@@ -203,14 +209,28 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 </div>
             </div>
             <div className="preview-content">
+                <style>
+                    {`
+                            @media print {
+                                @page {
+                                    size: A4 ${orientation};
+                                    margin: 0;
+                                }
+                                .preview-page {
+                                    width: ${orientation === 'landscape' ? 297 : 210}mm !important;
+                                    height: ${orientation === 'landscape' ? 210 : 297}mm !important;
+                                }
+                            }
+                        `}
+                </style>
                 <div
                     className="preview-scaler"
                     style={{
                         display: 'flex',
                         justifyContent: 'center',
                         zoom: scale,
-                        minWidth: '297mm',
-                        minHeight: '210mm',
+                        minWidth: `${orientation === 'landscape' ? 297 : 210}mm`,
+                        minHeight: `${orientation === 'landscape' ? 210 : 297}mm`,
                         margin: 'auto'
                     }}
                     onClick={handlePageClick}

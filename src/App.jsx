@@ -49,6 +49,7 @@ function App() {
   const [gap, setGap] = useState(1); // mm
   const [lineHeight, setLineHeight] = useState(1.2);
   const [scale, setScale] = useState(0.6);
+  const [orientation, setOrientation] = useState('landscape');
   const [splitSize, setSplitSize] = useState(50);
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
@@ -90,6 +91,8 @@ function App() {
         setLineHeight={setLineHeight}
         scale={scale}
         setScale={setScale}
+        orientation={orientation}
+        setOrientation={setOrientation}
         previewRef={previewRef}
       />
       <div className="main-content">
@@ -139,6 +142,7 @@ function App() {
             lineHeight={lineHeight}
             scale={scale}
             setScale={setScale}
+            orientation={orientation}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
           />
         </div>

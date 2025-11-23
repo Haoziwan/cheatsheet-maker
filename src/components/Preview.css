@@ -38,8 +38,6 @@
 }
 
 .preview-page {
-    width: 297mm;
-    height: 210mm;
     background: white;
     padding: 15mm;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -271,7 +269,6 @@
 /* Print optimization */
 @media print {
     @page {
-        size: A4 landscape;
         margin: 0;
     }
 
@@ -325,8 +322,6 @@
     .preview-page {
         box-shadow: none !important;
         margin: 0 !important;
-        width: 297mm !important;
-        height: 210mm !important;
         page-break-after: always;
         break-after: page;
         overflow: hidden;

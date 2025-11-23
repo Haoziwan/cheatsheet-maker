@@ -1,4 +1,4 @@
-import { Download, Github } from 'lucide-react';
+import { Download, Github, RectangleHorizontal, RectangleVertical } from 'lucide-react';
 import './Toolbar.css';
 
 function Toolbar({
@@ -7,6 +7,7 @@ function Toolbar({
     padding, setPadding,
     gap, setGap,
     lineHeight, setLineHeight,
+    orientation, setOrientation,
     previewRef
 }) {
     const handleExportPDF = () => {
@@ -87,6 +88,26 @@ function Toolbar({
                         onChange={(e) => setLineHeight(Number(e.target.value))}
                         className="number-input"
                     />
+                </div>
+
+                <div className="toolbar-control">
+                    <label className="label">Orientation</label>
+                    <div className="orientation-toggle">
+                        <button
+                            className={`icon-btn ${orientation === 'landscape' ? 'active' : ''}`}
+                            onClick={() => setOrientation('landscape')}
+                            title="Landscape"
+                        >
+                            <RectangleHorizontal size={18} />
+                        </button>
+                        <button
+                            className={`icon-btn ${orientation === 'portrait' ? 'active' : ''}`}
+                            onClick={() => setOrientation('portrait')}
+                            title="Portrait"
+                        >
+                            <RectangleVertical size={18} />
+                        </button>
+                    </div>
                 </div>
 
 
