@@ -71,21 +71,28 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         const widthMm = isLandscape ? 297 : 210;
         const heightMm = isLandscape ? 210 : 297;
 
+        // Safety checks for layout parameters
+        const safeColumns = Math.max(1, Number(columns) || 1);
+        const safePadding = Math.max(0, Number(padding) || 0);
+        const safeGap = Math.max(0, Number(gap) || 0);
+        const safeFontSize = Math.max(1, Number(fontSize) || 1);
+        const safeLineHeight = Math.max(0.1, Number(lineHeight) || 1);
+
         const pageWidthPx = mmToPx(widthMm);
         const pageHeightPx = mmToPx(heightMm);
-        const paddingPx = mmToPx(padding);
-        const gapPx = mmToPx(gap);
+        const paddingPx = mmToPx(safePadding);
+        const gapPx = mmToPx(safeGap);
         const contentWidthPx = pageWidthPx - paddingPx * 2;
-        const totalPaddingPx = gapPx * columns; // Total padding for all columns
-        const columnWidthPx = (contentWidthPx - totalPaddingPx) / columns;
+        const totalPaddingPx = gapPx * safeColumns; // Total padding for all columns
+        const columnWidthPx = (contentWidthPx - totalPaddingPx) / safeColumns;
         const columnHeightPx = pageHeightPx - paddingPx * 2;
 
         // Prepare measurer styles
         measureEl.style.width = `${columnWidthPx - gapPx}px`;
-        measureEl.style.fontSize = `${fontSize}pt`;
-        measureEl.style.lineHeight = lineHeight;
-        measureEl.style.paddingLeft = `${gap / 2}mm`;
-        measureEl.style.paddingRight = `${gap / 2}mm`;
+        measureEl.style.fontSize = `${safeFontSize}pt`;
+        measureEl.style.lineHeight = safeLineHeight;
+        measureEl.style.paddingLeft = `${safeGap / 2}mm`;
+        measureEl.style.paddingRight = `${safeGap / 2}mm`;
 
         const container = pagesContainerRef.current;
         if (!container) return;
@@ -100,9 +107,9 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             page.className = 'preview-page';
             page.style.width = `${widthMm}mm`;
             page.style.height = `${heightMm}mm`;
-            page.style.fontSize = `${fontSize}pt`;
-            page.style.lineHeight = lineHeight;
-            page.style.padding = `${padding}mm`;
+            page.style.fontSize = `${safeFontSize}pt`;
+            page.style.lineHeight = safeLineHeight;
+            page.style.padding = `${safePadding}mm`;
 
             // Apply theme
             const currentTheme = themes[theme] || themes.classic;
@@ -126,16 +133,16 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
 
             const grid = document.createElement('div');
             grid.className = 'page-columns';
-            grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            grid.style.gridTemplateColumns = `repeat(${safeColumns}, 1fr)`;
             grid.style.gap = '0mm'; // Remove gap as we'll use padding instead
 
             const cols = [];
-            for (let i = 0; i < columns; i++) {
+            for (let i = 0; i < safeColumns; i++) {
                 const col = document.createElement('div');
                 col.className = 'page-column';
                 col.style.height = `${columnHeightPx}px`;
-                col.style.paddingLeft = `${gap / 2}mm`;
-                col.style.paddingRight = `${gap / 2}mm`;
+                col.style.paddingLeft = `${safeGap / 2}mm`;
+                col.style.paddingRight = `${safeGap / 2}mm`;
                 grid.appendChild(col);
                 cols.push(col);
             }
@@ -155,7 +162,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             if (overflow) {
                 cols[colIndex].removeChild(node);
                 colIndex += 1;
-                if (colIndex >= columns) {
+                if (colIndex >= safeColumns) {
                     cols = createPage();
                     colIndex = 0;
                 }
@@ -193,21 +200,28 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         const widthMm = isLandscape ? 297 : 210;
         const heightMm = isLandscape ? 210 : 297;
 
+        // Safety checks for layout parameters
+        const safeColumns = Math.max(1, Number(columns) || 1);
+        const safePadding = Math.max(0, Number(padding) || 0);
+        const safeGap = Math.max(0, Number(gap) || 0);
+        const safeFontSize = Math.max(1, Number(fontSize) || 1);
+        const safeLineHeight = Math.max(0.1, Number(lineHeight) || 1);
+
         const pageWidthPx = mmToPx(widthMm);
         const pageHeightPx = mmToPx(heightMm);
-        const paddingPx = mmToPx(padding);
-        const gapPx = mmToPx(gap);
+        const paddingPx = mmToPx(safePadding);
+        const gapPx = mmToPx(safeGap);
         const contentWidthPx = pageWidthPx - paddingPx * 2;
-        const totalPaddingPx = gapPx * columns; // Total padding for all columns
-        const columnWidthPx = (contentWidthPx - totalPaddingPx) / columns;
+        const totalPaddingPx = gapPx * safeColumns; // Total padding for all columns
+        const columnWidthPx = (contentWidthPx - totalPaddingPx) / safeColumns;
         const columnHeightPx = pageHeightPx - paddingPx * 2;
 
         // Prepare measurer styles
         measureEl.style.width = `${columnWidthPx - gapPx}px`;
-        measureEl.style.fontSize = `${fontSize}pt`;
-        measureEl.style.lineHeight = lineHeight;
-        measureEl.style.paddingLeft = `${gap / 2}mm`;
-        measureEl.style.paddingRight = `${gap / 2}mm`;
+        measureEl.style.fontSize = `${safeFontSize}pt`;
+        measureEl.style.lineHeight = safeLineHeight;
+        measureEl.style.paddingLeft = `${safeGap / 2}mm`;
+        measureEl.style.paddingRight = `${safeGap / 2}mm`;
 
         const container = pagesContainerRef.current;
         if (!container) return;
@@ -222,9 +236,9 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             page.className = 'preview-page';
             page.style.width = `${widthMm}mm`;
             page.style.height = `${heightMm}mm`;
-            page.style.fontSize = `${fontSize}pt`;
-            page.style.lineHeight = lineHeight;
-            page.style.padding = `${padding}mm`;
+            page.style.fontSize = `${safeFontSize}pt`;
+            page.style.lineHeight = safeLineHeight;
+            page.style.padding = `${safePadding}mm`;
 
             // Apply theme
             const currentTheme = themes[theme] || themes.classic;
@@ -248,16 +262,16 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
 
             const grid = document.createElement('div');
             grid.className = 'page-columns';
-            grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            grid.style.gridTemplateColumns = `repeat(${safeColumns}, 1fr)`;
             grid.style.gap = '0mm'; // Remove gap as we'll use padding instead
 
             const cols = [];
-            for (let i = 0; i < columns; i++) {
+            for (let i = 0; i < safeColumns; i++) {
                 const col = document.createElement('div');
                 col.className = 'page-column';
                 col.style.height = `${columnHeightPx}px`;
-                col.style.paddingLeft = `${gap / 2}mm`;
-                col.style.paddingRight = `${gap / 2}mm`;
+                col.style.paddingLeft = `${safeGap / 2}mm`;
+                col.style.paddingRight = `${safeGap / 2}mm`;
                 grid.appendChild(col);
                 cols.push(col);
             }
@@ -277,7 +291,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             if (overflow) {
                 cols[colIndex].removeChild(node);
                 colIndex += 1;
-                if (colIndex >= columns) {
+                if (colIndex >= safeColumns) {
                     cols = createPage();
                     colIndex = 0;
                 }
