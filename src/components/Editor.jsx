@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
-import { Eye, Edit3, Columns, Download } from 'lucide-react';
+import { Eye, Edit3, Columns, Download, Maximize, X } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import MermaidDiagram from './MermaidDiagram';
 import 'katex/dist/katex.min.css';
@@ -21,6 +21,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     const editorRef = useRef(null);
     const previewRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     // Use deferred value for markdown to prevent blocking the UI during typing
     // This allows the editor to remain responsive even if the preview takes time to render
@@ -155,7 +156,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     }), []);
 
     return (
-        <div className="editor">
+        <div className={`editor ${isFullscreen ? 'editor-fullscreen' : ''}`}>
             <div className="editor-header">
                 <div className="editor-header-left">
                     <span className="editor-title">Markdown Editor</span>
@@ -201,6 +202,13 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                         title="Download Markdown"
                     >
                         <Download size={14} />
+                    </button>
+                    <button
+                        className="editor-fullscreen-btn"
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                    >
+                        {isFullscreen ? <X size={14} /> : <Maximize size={14} />}
                     </button>
                 </div>
             </div>
