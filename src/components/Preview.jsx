@@ -12,6 +12,15 @@ import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
 
+// Preprocess markdown to handle **text:** patterns
+const preprocessMarkdown = (markdown) => {
+    // Match **text with punctuation** and add space before closing **
+    // Supports: :;,!?.()[]{}"'<>-–—/\|@#$%^&*+=~`
+    // Both English and Chinese punctuation
+    return markdown.replace(/\*\*([^*]+?)([：:;,!?。，；！？\)\]\}"'》>\-–—\/\\|@#$%^&*+=~`])\*\*/g, '**$1$2** ');
+};
+
+
 const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, fontFamily, onLineClick, liveUpdate, setLiveUpdate }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
@@ -513,7 +522,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                         rehypePlugins={[rehypeKatex]}
                         components={components}
                     >
-                        {markdown}
+                        {preprocessMarkdown(markdown)}
                     </ReactMarkdown>
                 </div>
             </div>

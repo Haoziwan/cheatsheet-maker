@@ -9,6 +9,14 @@ import MermaidDiagram from './MermaidDiagram';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
 
+// Preprocess markdown to handle **text:** patterns
+const preprocessMarkdown = (markdown) => {
+    // Match **text with punctuation** and add space before closing **
+    // Supports: :;,!?.()[]{}"'<>-–—/\|@#$%^&*+=~`
+    // Both English and Chinese punctuation
+    return markdown.replace(/\*\*([^*]+?)([：:;,!?。，；！？\)\]\}"'》>\-–—\/\\|@#$%^&*+=~`])\*\*/g, '**$1$2** ');
+};
+
 const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     const editorRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
@@ -183,7 +191,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                             rehypePlugins={[rehypeKatex]}
                             components={components}
                         >
-                            {markdown}
+                            {preprocessMarkdown(markdown)}
                         </ReactMarkdown>
                     </div>
                 </div>
