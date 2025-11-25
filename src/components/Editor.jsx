@@ -13,9 +13,9 @@ import './Editor.css';
 // Preprocess markdown to handle **text:** patterns
 const preprocessMarkdown = (markdown) => {
     // Match **text with punctuation** and add space before closing **
-    // Supports: :;,!?.()[]{}"'<>-–—/\|@#$%^&*+=~`
+    // Supports: :;,!?.()[]{}\"'<>-–—/\\|@#$%^&*+=~`
     // Both English and Chinese punctuation
-    return markdown.replace(/\*\*([^*]+?)([：:;,!?。，；！？\)\]\}"'》>\-–—\/\\|@#$%^&*+=~`])\*\*/g, '**$1$2** ');
+    return markdown.replace(/\*\*([^*]+?)([：:;,!?。，；！？\)\]\}\"'》>\\-–—\\/\\\\|@#$%^&*+=~`])\*\*/g, '**$1$2** ');
 };
 
 const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
@@ -71,8 +71,6 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
 
     const [toolbarVisible, setToolbarVisible] = useState(false);
     const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
-
-    // ... existing code ...
 
     const handleFormat = (type) => {
         if (!editorRef.current) return;
@@ -144,9 +142,30 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
 
             if (position && domNode) {
                 const rect = domNode.getBoundingClientRect();
+                const toolbarWidth = 320; // Approximate width of toolbar
+                const viewportWidth = window.innerWidth;
+
+                let left = rect.left + position.left;
+                let top = rect.top + position.top;
+
+                // Adjust horizontal position if toolbar would be clipped
+                // Center the toolbar by default
+                const centeredLeft = left - toolbarWidth / 2;
+
+                // Check if toolbar would overflow on the left
+                if (centeredLeft < 10) {
+                    left = toolbarWidth / 2 + 10; // Add padding from edge
+                }
+                // Check if toolbar would overflow on the right
+                else if (centeredLeft + toolbarWidth > viewportWidth - 10) {
+                    left = viewportWidth - toolbarWidth / 2 - 10;
+                } else {
+                    left = centeredLeft + toolbarWidth / 2;
+                }
+
                 setToolbarPosition({
-                    top: rect.top + position.top,
-                    left: rect.left + position.left
+                    top: top,
+                    left: left
                 });
                 setToolbarVisible(true);
             }
