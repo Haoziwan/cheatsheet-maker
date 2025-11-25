@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef, useMemo, useDeferredValue } from 'react';
 import { ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -25,6 +25,14 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
     const layoutTimeoutRef = useRef(null);
+
+    // Use deferred value for markdown to prevent blocking the UI during typing
+    const deferredMarkdown = useDeferredValue(markdown);
+
+    // Memoize preprocessed markdown
+    const preprocessedMarkdown = useMemo(() => {
+        return preprocessMarkdown(deferredMarkdown);
+    }, [deferredMarkdown]);
 
     const pxPerMmRef = useRef(null);
     const mmToPx = (mm) => {
@@ -186,7 +194,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
 
     useEffect(() => {
         updateLayout();
-    }, [markdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, liveUpdate]);
+    }, [deferredMarkdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, liveUpdate]);
 
     const handleResourceLoad = () => {
         // Debounce layout updates from resource loading (images, mermaid)
@@ -317,7 +325,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     const currentTheme = themes[theme] || themes.classic;
     const themeStyles = currentTheme.styles || {};
 
-    const components = {
+    const components = useMemo(() => ({
         h1: (props) => <h1 className="md-h1" style={themeStyles.h1} data-line={props.node?.position?.start?.line} {...props} />,
         h2: (props) => <h2 className="md-h2" style={themeStyles.h2} data-line={props.node?.position?.start?.line} {...props} />,
         h3: (props) => <h3 className="md-h3" style={themeStyles.h3} data-line={props.node?.position?.start?.line} {...props} />,
@@ -428,7 +436,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 {...props}
             />
         ),
-    };
+    }), [themeStyles]);
 
     return (
         <div className="preview">
@@ -517,13 +525,15 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     style={{ position: 'absolute', left: '-9999px', top: '-9999px', visibility: 'hidden' }}
                     className="md-measurer"
                 >
-                    <ReactMarkdown
-                        remarkPlugins={[remarkMath, remarkGfm]}
-                        rehypePlugins={[rehypeKatex]}
-                        components={components}
-                    >
-                        {preprocessMarkdown(markdown)}
-                    </ReactMarkdown>
+                    {liveUpdate && (
+                        <ReactMarkdown
+                            remarkPlugins={[remarkMath, remarkGfm]}
+                            rehypePlugins={[rehypeKatex]}
+                            components={components}
+                        >
+                            {preprocessedMarkdown}
+                        </ReactMarkdown>
+                    )}
                 </div>
             </div>
         </div>

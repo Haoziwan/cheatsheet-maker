@@ -1,4 +1,4 @@
-import { useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo, useDeferredValue } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
@@ -21,6 +21,15 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     const editorRef = useRef(null);
     const previewRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
+
+    // Use deferred value for markdown to prevent blocking the UI during typing
+    // This allows the editor to remain responsive even if the preview takes time to render
+    const deferredMarkdown = useDeferredValue(markdown);
+
+    // Memoize preprocessed markdown to avoid unnecessary regex operations
+    const preprocessedMarkdown = useMemo(() => {
+        return preprocessMarkdown(deferredMarkdown);
+    }, [deferredMarkdown]);
 
     useImperativeHandle(ref, () => ({
         scrollToLine: (line) => {
@@ -105,7 +114,8 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     };
 
     // Custom components to inject source line numbers
-    const components = {
+    // Memoize components to prevent unnecessary re-renders
+    const components = useMemo(() => ({
         p: ({ node, ...props }) => <p data-line={node?.position?.start?.line} {...props} />,
         h1: ({ node, ...props }) => <h1 data-line={node?.position?.start?.line} {...props} />,
         h2: ({ node, ...props }) => <h2 data-line={node?.position?.start?.line} {...props} />,
@@ -142,7 +152,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                 </code>
             );
         },
-    };
+    }), []);
 
     return (
         <div className="editor">
@@ -220,15 +230,17 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                     className={`editor-pane editor-pane-preview ${viewMode === 'edit' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}
                     onClick={handlePreviewClick}
                 >
-                    <div className="markdown-body">
-                        <ReactMarkdown
-                            remarkPlugins={[remarkMath, remarkGfm]}
-                            rehypePlugins={[rehypeKatex]}
-                            components={components}
-                        >
-                            {preprocessMarkdown(markdown)}
-                        </ReactMarkdown>
-                    </div>
+                    {viewMode !== 'edit' && (
+                        <div className="markdown-body">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkMath, remarkGfm]}
+                                rehypePlugins={[rehypeKatex]}
+                                components={components}
+                            >
+                                {preprocessedMarkdown}
+                            </ReactMarkdown>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
