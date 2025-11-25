@@ -6,6 +6,7 @@ import rehypeKatex from 'rehype-katex';
 import { Eye, Edit3, Columns, Download, Maximize, X } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import MermaidDiagram from './MermaidDiagram';
+import FormattingToolbar from './FormattingToolbar';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
 
@@ -68,10 +69,103 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
         }
     };
 
+    const [toolbarVisible, setToolbarVisible] = useState(false);
+    const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
+
+    // ... existing code ...
+
+    const handleFormat = (type) => {
+        if (!editorRef.current) return;
+
+        const editor = editorRef.current;
+        const selection = editor.getSelection();
+        const text = editor.getModel().getValueInRange(selection);
+
+        let newText = text;
+        let range = selection;
+
+        switch (type) {
+            case 'bold':
+                newText = `**${text}**`;
+                break;
+            case 'italic':
+                newText = `*${text}*`;
+                break;
+            case 'strikethrough':
+                newText = `~~${text}~~`;
+                break;
+            case 'code':
+                newText = `\`${text}\``;
+                break;
+            case 'link':
+                newText = `[${text}](url)`;
+                break;
+            case 'h1':
+                newText = `# ${text}`;
+                break;
+            case 'h2':
+                newText = `## ${text}`;
+                break;
+            case 'h3':
+                newText = `### ${text}`;
+                break;
+            case 'unordered-list':
+                newText = text.split('\n').map(line => `- ${line}`).join('\n');
+                break;
+            case 'ordered-list':
+                newText = text.split('\n').map((line, i) => `${i + 1}. ${line}`).join('\n');
+                break;
+            default:
+                return;
+        }
+
+        editor.executeEdits('toolbar', [{
+            range: range,
+            text: newText,
+            forceMoveMarkers: true
+        }]);
+
+        editor.focus();
+        setToolbarVisible(false);
+    };
+
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
 
+        const updateToolbarPosition = () => {
+            const selection = editor.getSelection();
+            if (!selection || selection.isEmpty()) {
+                setToolbarVisible(false);
+                return;
+            }
+
+            const position = editor.getScrolledVisiblePosition(selection.getEndPosition());
+            const domNode = editor.getDomNode();
+
+            if (position && domNode) {
+                const rect = domNode.getBoundingClientRect();
+                setToolbarPosition({
+                    top: rect.top + position.top,
+                    left: rect.left + position.left
+                });
+                setToolbarVisible(true);
+            }
+        };
+
+        editor.onDidChangeCursorSelection((e) => {
+            if (e.selection.isEmpty()) {
+                setToolbarVisible(false);
+            } else if (e.source === 'keyboard') {
+                updateToolbarPosition();
+            }
+        });
+
+        editor.onMouseUp(() => {
+            updateToolbarPosition();
+        });
+
         editor.onMouseDown((e) => {
+            setToolbarVisible(false);
             // Sync only on double click
             if (e.event.browserEvent.detail === 2 && e.target.position) {
                 scrollToMarkdownLine(e.target.position.lineNumber);
@@ -157,6 +251,11 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
 
     return (
         <div className={`editor ${isFullscreen ? 'editor-fullscreen' : ''}`}>
+            <FormattingToolbar
+                visible={toolbarVisible}
+                position={toolbarPosition}
+                onFormat={handleFormat}
+            />
             <div className="editor-header">
                 <div className="editor-header-left">
                     <span className="editor-title">Markdown Editor</span>
