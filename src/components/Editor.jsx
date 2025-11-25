@@ -1,4 +1,4 @@
-import { useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo, useDeferredValue } from 'react';
+import { useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo, useDeferredValue, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
@@ -22,6 +22,7 @@ const preprocessMarkdown = (markdown) => {
 
 const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     const editorRef = useRef(null);
+    const monacoRef = useRef(null);
     const previewRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -129,91 +130,91 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
         setToolbarVisible(false);
     };
 
-    const handleEditorDidMount = (editor, monaco) => {
-        editorRef.current = editor;
+    // 处理图片上传
+    const handleImageUpload = async (files) => {
+        const editor = editorRef.current;
+        const monaco = monacoRef.current;
 
-        // 处理图片上传
-        const handleImageUpload = async (files) => {
-            if (!files || files.length === 0) return;
+        if (!editor || !monaco || !files || files.length === 0) return;
 
-            for (const file of files) {
-                if (file.type.startsWith('image/')) {
-                    try {
-                        // 保存图片到IndexedDB
-                        const imageId = await imageStorage.saveImage(file);
+        for (const file of files) {
+            if (file.type.startsWith('image/')) {
+                try {
+                    // 保存图片到IndexedDB
+                    const imageId = await imageStorage.saveImage(file);
 
-                        // 在光标位置插入图片引用
-                        const position = editor.getPosition();
-                        const range = new monaco.Range(
-                            position.lineNumber,
-                            position.column,
-                            position.lineNumber,
-                            position.column
-                        );
+                    // 在光标位置插入图片引用
+                    const position = editor.getPosition();
+                    const range = new monaco.Range(
+                        position.lineNumber,
+                        position.column,
+                        position.lineNumber,
+                        position.column
+                    );
 
-                        const imageName = file.name || 'image';
-                        const imageMarkdown = `![${imageName}](${imageId})\n`;
+                    const imageName = file.name || 'image';
+                    const imageMarkdown = `![${imageName}](${imageId})\n`;
 
-                        editor.executeEdits('image-upload', [{
-                            range: range,
-                            text: imageMarkdown,
-                            forceMoveMarkers: true
-                        }]);
+                    editor.executeEdits('image-upload', [{
+                        range: range,
+                        text: imageMarkdown,
+                        forceMoveMarkers: true
+                    }]);
 
-                        // 更新光标位置到插入图片后
-                        const newPosition = {
-                            lineNumber: position.lineNumber + 1,
-                            column: 1
-                        };
-                        editor.setPosition(newPosition);
-                        editor.focus();
-                    } catch (error) {
-                        console.error('Failed to upload image:', error);
-                        alert('图片上传失败，请重试');
+                    // 更新光标位置到插入图片后
+                    const newPosition = {
+                        lineNumber: position.lineNumber + 1,
+                        column: 1
+                    };
+                    editor.setPosition(newPosition);
+                    editor.focus();
+                } catch (error) {
+                    console.error('Failed to upload image:', error);
+                    alert('图片上传失败，请重试');
+                }
+            }
+        }
+    };
+
+    // 全局粘贴事件监听
+    useEffect(() => {
+        const handlePaste = async (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            const imageFiles = [];
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        imageFiles.push(file);
                     }
+                }
+            }
+
+            if (imageFiles.length > 0) {
+                // 如果有图片，且编辑器已加载，则拦截
+                if (editorRef.current) {
+                    e.preventDefault();
+                    await handleImageUpload(imageFiles);
                 }
             }
         };
 
+        window.addEventListener('paste', handlePaste);
+        return () => {
+            window.removeEventListener('paste', handlePaste);
+        };
+    }, []);
 
-        // 监听粘贴事件
+    const handleEditorDidMount = (editor, monaco) => {
+        editorRef.current = editor;
+        monacoRef.current = monaco;
+
+        // 监听拖拽事件
         const domNode = editor.getDomNode();
         if (domNode) {
-            domNode.addEventListener('paste', async (e) => {
-                const items = e.clipboardData?.items;
-                if (!items) return;
-
-                // 先检查是否有图片
-                let hasImage = false;
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].type.startsWith('image/')) {
-                        hasImage = true;
-                        break;
-                    }
-                }
-
-                // 如果有图片，阻止默认行为并处理图片
-                if (hasImage) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const files = [];
-                    for (let i = 0; i < items.length; i++) {
-                        const item = items[i];
-                        if (item.type.startsWith('image/')) {
-                            const file = item.getAsFile();
-                            if (file) files.push(file);
-                        }
-                    }
-
-                    if (files.length > 0) {
-                        await handleImageUpload(files);
-                    }
-                }
-            });
-
-
-            // 监听拖拽事件
             domNode.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 e.stopPropagation();

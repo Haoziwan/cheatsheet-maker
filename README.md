@@ -14,7 +14,9 @@ A React-based application for creating and exporting cheatsheets as PDF document
 - Customizable multi-column layout settings
 - Mathematical expressions with KaTeX
 - Diagrams with Mermaid
-- Automatic saving using localStorage
+- drag and drop images directly into the editor (images are stored in IndexedDB, F12 clear site data to remove)
+
+- Automatic saving settings using localStorage
 
 ## Tech Stack
 
