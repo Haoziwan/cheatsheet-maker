@@ -512,6 +512,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     onClick={handlePageClick}
                 >
                     <div
+                        className="pages-container"
                         ref={(el) => {
                             pagesContainerRef.current = el;
                             if (typeof ref === 'function') ref(el);

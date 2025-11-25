@@ -285,7 +285,8 @@
     .preview-panel,
     .preview,
     .preview-content,
-    .preview-scaler {
+    .preview-scaler,
+    .pages-container {
         display: block !important;
         width: 100% !important;
         height: auto !important;
