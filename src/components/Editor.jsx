@@ -7,6 +7,8 @@ import { Eye, Edit3, Columns, Download, Maximize, X } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import MermaidDiagram from './MermaidDiagram';
 import FormattingToolbar from './FormattingToolbar';
+import ImageRenderer from './ImageRenderer';
+import imageStorage from '../utils/imageStorage';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
 
@@ -130,6 +132,106 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
 
+        // 处理图片上传
+        const handleImageUpload = async (files) => {
+            if (!files || files.length === 0) return;
+
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    try {
+                        // 保存图片到IndexedDB
+                        const imageId = await imageStorage.saveImage(file);
+
+                        // 在光标位置插入图片引用
+                        const position = editor.getPosition();
+                        const range = new monaco.Range(
+                            position.lineNumber,
+                            position.column,
+                            position.lineNumber,
+                            position.column
+                        );
+
+                        const imageName = file.name || 'image';
+                        const imageMarkdown = `![${imageName}](${imageId})\n`;
+
+                        editor.executeEdits('image-upload', [{
+                            range: range,
+                            text: imageMarkdown,
+                            forceMoveMarkers: true
+                        }]);
+
+                        // 更新光标位置到插入图片后
+                        const newPosition = {
+                            lineNumber: position.lineNumber + 1,
+                            column: 1
+                        };
+                        editor.setPosition(newPosition);
+                        editor.focus();
+                    } catch (error) {
+                        console.error('Failed to upload image:', error);
+                        alert('图片上传失败，请重试');
+                    }
+                }
+            }
+        };
+
+
+        // 监听粘贴事件
+        const domNode = editor.getDomNode();
+        if (domNode) {
+            domNode.addEventListener('paste', async (e) => {
+                const items = e.clipboardData?.items;
+                if (!items) return;
+
+                // 先检查是否有图片
+                let hasImage = false;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith('image/')) {
+                        hasImage = true;
+                        break;
+                    }
+                }
+
+                // 如果有图片，阻止默认行为并处理图片
+                if (hasImage) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const files = [];
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        if (item.type.startsWith('image/')) {
+                            const file = item.getAsFile();
+                            if (file) files.push(file);
+                        }
+                    }
+
+                    if (files.length > 0) {
+                        await handleImageUpload(files);
+                    }
+                }
+            });
+
+
+            // 监听拖拽事件
+            domNode.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            domNode.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const files = Array.from(e.dataTransfer?.files || []);
+                const imageFiles = files.filter(f => f.type.startsWith('image/'));
+
+                if (imageFiles.length > 0) {
+                    await handleImageUpload(imageFiles);
+                }
+            });
+        }
+
         const updateToolbarPosition = () => {
             const selection = editor.getSelection();
             if (!selection || selection.isEmpty()) {
@@ -241,6 +343,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
         blockquote: ({ node, ...props }) => <blockquote data-line={node?.position?.start?.line} {...props} />,
         pre: ({ node, ...props }) => <pre data-line={node?.position?.start?.line} {...props} />,
         table: ({ node, ...props }) => <table data-line={node?.position?.start?.line} {...props} />,
+        img: (props) => <ImageRenderer {...props} />,
         code: ({ node, inline, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';

@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import MermaidDiagram from './MermaidDiagram';
+import ImageRenderer from './ImageRenderer';
 import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
@@ -428,7 +429,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         em: (props) => <em className="md-em" {...props} />,
         hr: (props) => <hr className="md-hr" {...props} />,
         img: (props) => (
-            <img
+            <ImageRenderer
                 className="md-img"
                 data-line={props.node?.position?.start?.line}
                 onLoad={handleResourceLoad}
