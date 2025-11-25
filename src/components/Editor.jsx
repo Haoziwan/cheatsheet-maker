@@ -19,6 +19,7 @@ const preprocessMarkdown = (markdown) => {
 
 const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
     const editorRef = useRef(null);
+    const previewRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
 
     useImperativeHandle(ref, () => ({
@@ -31,8 +32,41 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
         }
     }));
 
+    const scrollToMarkdownLine = (line) => {
+        if (!previewRef.current || previewRef.current.classList.contains('hidden')) return;
+
+        // Find the closest element with a data-line attribute <= line
+        let target = null;
+        for (let i = line; i >= 1; i--) {
+            target = previewRef.current.querySelector(`[data-line="${i}"]`);
+            if (target) break;
+        }
+
+        if (target) {
+            const container = previewRef.current;
+            // Calculate position relative to container to avoid window shaking
+            // caused by scrollIntoView() bubbling up
+            const targetRect = target.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const relativeTop = targetRect.top - containerRect.top;
+
+            // Scroll to center
+            container.scrollTo({
+                top: container.scrollTop + relativeTop - container.clientHeight / 2 + targetRect.height / 2,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
+
+        editor.onMouseDown((e) => {
+            // Sync only on double click
+            if (e.event.browserEvent.detail === 2 && e.target.position) {
+                scrollToMarkdownLine(e.target.position.lineNumber);
+            }
+        });
     };
 
     const handlePreviewClick = (e) => {
@@ -182,6 +216,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                     />
                 </div>
                 <div
+                    ref={previewRef}
                     className={`editor-pane editor-pane-preview ${viewMode === 'edit' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}
                     onClick={handlePreviewClick}
                 >

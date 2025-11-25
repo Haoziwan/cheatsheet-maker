@@ -71,7 +71,8 @@
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.2s;
-    margin-left: 8px; /* Add some distance from the other buttons */
+    margin-left: 8px;
+    /* Add some distance from the other buttons */
 }
 
 .editor-download-btn:hover {
