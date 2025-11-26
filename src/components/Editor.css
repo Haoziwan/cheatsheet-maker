@@ -59,6 +59,27 @@
     border-color: var(--color-text-tertiary);
 }
 
+.outline-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: var(--spacing-sm);
+}
+
+.outline-toggle-btn:hover {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border-color: var(--color-text-tertiary);
+}
+
 .editor-download-btn {
     display: flex;
     align-items: center;
@@ -121,11 +142,33 @@
     display: flex;
 }
 
+.outline-panel {
+    width: 250px;
+    background: var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .editor-pane {
     flex: 1;
     height: 100%;
     overflow: auto;
     min-width: 0;
+}
+
+.resize-handle-editor {
+    width: 5px;
+    background: var(--color-border);
+    cursor: col-resize;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.resize-handle-editor:hover {
+    background: var(--color-accent-primary);
 }
 
 .editor-pane.hidden {

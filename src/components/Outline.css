@@ -1,0 +1,101 @@
+.outline-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: var(--spacing-sm);
+}
+
+.outline-toggle-btn:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-tertiary);
+}
+
+.outline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.outline-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.outline-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.outline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.outline-item {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.outline-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.outline-item-level-1 .outline-text {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.outline-item-level-2 .outline-text {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  padding-left: var(--spacing-sm);
+}
+
+.outline-item-level-3 .outline-text {
+  font-size: 0.75rem;
+  padding-left: calc(var(--spacing-sm) * 2);
+}
+
+.outline-item-level-4 .outline-text,
+.outline-item-level-5 .outline-text,
+.outline-item-level-6 .outline-text {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  padding-left: calc(var(--spacing-sm) * 3);
+}
+
+.outline-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outline-empty {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  padding: var(--spacing-lg);
+  font-style: italic;
+}

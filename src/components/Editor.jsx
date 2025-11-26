@@ -4,11 +4,12 @@ import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
-import { Eye, Edit3, Columns, Download, Maximize, X } from 'lucide-react';
+import { Eye, Edit3, Columns, Download, Maximize, X, Menu } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import MermaidDiagram from './MermaidDiagram';
 import FormattingToolbar from './FormattingToolbar';
 import ImageRenderer from './ImageRenderer';
+import Outline from './Outline';
 import imageStorage from '../utils/imageStorage';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
@@ -373,6 +374,8 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
         },
     }), []);
 
+    const [isOutlineOpen, setIsOutlineOpen] = useState(false);
+
     return (
         <div className={`editor ${isFullscreen ? 'editor-fullscreen' : ''}`}>
             <FormattingToolbar
@@ -382,6 +385,13 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
             />
             <div className="editor-header">
                 <div className="editor-header-left">
+                    <button 
+                        className="outline-toggle-btn"
+                        onClick={() => setIsOutlineOpen(!isOutlineOpen)}
+                        title={isOutlineOpen ? "Hide Outline" : "Show Outline"}
+                    >
+                        {isOutlineOpen ? <X size={16} /> : <Menu size={16} />}
+                    </button>
                     <span className="editor-title">Markdown Editor</span>
                     <span className="editor-info">
                         {markdown.length} chars · {markdown.split('\n').length} lines
@@ -436,6 +446,20 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                 </div>
             </div>
             <div className="editor-content">
+                {isOutlineOpen && (
+                    <div className="outline-panel">
+                        <Outline 
+                            markdown={markdown}
+                            onHeadingClick={(lineNumber) => {
+                                if (editorRef.current) {
+                                    editorRef.current.revealLineInCenter(lineNumber);
+                                    editorRef.current.setPosition({ lineNumber, column: 1 });
+                                    editorRef.current.focus();
+                                }
+                            }}
+                        />
+                    </div>
+                )}
                 <div className={`editor-pane editor-pane-edit ${viewMode === 'preview' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}>
                     <MonacoEditor
                         height="100%"
@@ -456,6 +480,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                         }}
                     />
                 </div>
+                <div className="resize-handle resize-handle-editor"></div>
                 <div
                     ref={previewRef}
                     className={`editor-pane editor-pane-preview ${viewMode === 'edit' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}
