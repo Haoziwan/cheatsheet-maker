@@ -18,6 +18,7 @@ A React-based application for creating and exporting cheatsheets as PDF document
 - drag and drop images directly into the editor (images are stored in IndexedDB, F12 clear site data to remove)
 
 - Automatic saving settings using localStorage
+- Create, rename, delete, and switch between multiple files
 
 ## Tech Stack
 

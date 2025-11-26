@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { File, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { File, Plus, Trash2, Edit2, Check, X, Image, Copy, Link, Eye } from 'lucide-react';
+import imageStorage from '../utils/imageStorage';
 import './FilePanel.css';
 
 function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, markdown }) {
     const [files, setFiles] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editingName, setEditingName] = useState('');
+    const [images, setImages] = useState([]);
+    const [showImages, setShowImages] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
 
     // 从 localStorage 加载文件列表（每次打开面板时重新加载）
     useEffect(() => {
@@ -38,6 +42,22 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
             localStorage.setItem('cheatsheet_files', JSON.stringify([defaultFile]));
         }
     }, [isOpen]);
+
+    // 加载图片列表
+    useEffect(() => {
+        if (isOpen && showImages) {
+            loadImages();
+        }
+    }, [isOpen, showImages]);
+
+    const loadImages = async () => {
+        try {
+            const allImages = await imageStorage.getAllImages();
+            setImages(allImages);
+        } catch (error) {
+            console.error('Failed to load images:', error);
+        }
+    };
 
     // 保存文件列表到 localStorage
     const saveFiles = (updatedFiles) => {
@@ -74,6 +94,43 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                 onFileChange(updatedFiles[0]);
             }
         }
+    };
+
+    // 删除图片
+    const handleDeleteImage = async (imageId) => {
+        if (confirm('Are you sure you want to delete this image?')) {
+            try {
+                await imageStorage.deleteImage(imageId);
+                setImages(images.filter(img => img.id !== imageId));
+                if (previewImage && previewImage.id === imageId) {
+                    setPreviewImage(null);
+                }
+            } catch (error) {
+                console.error('Failed to delete image:', error);
+                alert('Failed to delete image');
+            }
+        }
+    };
+
+    // 复制图片链接
+    const handleCopyLink = (imageId) => {
+        const link = `![image](${imageId})`;
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Image link copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy link:', err);
+            alert('Failed to copy link');
+        });
+    };
+
+    // 预览图片
+    const handlePreviewImage = async (image) => {
+        setPreviewImage(image);
+    };
+
+    // 关闭预览
+    const handleClosePreview = () => {
+        setPreviewImage(null);
     };
 
     // 开始重命名
@@ -123,101 +180,177 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
             <div className="file-panel-overlay" onClick={onClose}></div>
             <div className="file-panel">
                 <div className="file-panel-header">
-                    <h2>Files</h2>
+                    <div className="file-panel-header-content">
+                        <h2>{showImages ? 'Images' : 'Files'}</h2>
+                        {!showImages && (
+                            <div className="file-panel-notice">
+                                The file may be lost. Please download it locally
+                            </div>
+                        )}
+                    </div>
                     <button className="btn-close" onClick={onClose}>
                         <X size={20} />
                     </button>
                 </div>
 
                 <div className="file-panel-actions">
-                    <button className="btn btn-primary" onClick={handleNewFile}>
-                        <Plus size={16} />
-                        New File
-                    </button>
+                    {!showImages ? (
+                        <>
+                            <button className="btn btn-primary" onClick={handleNewFile}>
+                                <Plus size={16} />
+                                New File
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => setShowImages(true)}>
+                                <Image size={16} />
+                                Images
+                            </button>
+                        </>
+                    ) : (
+                        <button className="btn btn-secondary" onClick={() => setShowImages(false)}>
+                            <File size={16} />
+                            Back to Files
+                        </button>
+                    )}
                 </div>
 
                 <div className="file-list">
-                    {files.map(file => (
-                        <div
-                            key={file.id}
-                            className={`file-item ${currentFile && currentFile.id === file.id ? 'active' : ''}`}
-                        >
-                            <div className="file-item-main" onClick={() => onFileChange(file)}>
-                                <File size={16} className="file-icon" />
-                                <div className="file-info">
-                                    {editingId === file.id ? (
-                                        <div className="file-name-edit">
-                                            <input
-                                                type="text"
-                                                value={editingName}
-                                                onChange={(e) => setEditingName(e.target.value)}
-                                                onClick={(e) => e.stopPropagation()}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
+                    {!showImages ? (
+                        files.map(file => (
+                            <div
+                                key={file.id}
+                                className={`file-item ${currentFile && currentFile.id === file.id ? 'active' : ''}`}
+                            >
+                                <div className="file-item-main" onClick={() => onFileChange(file)}>
+                                    <File size={16} className="file-icon" />
+                                    <div className="file-info">
+                                        {editingId === file.id ? (
+                                            <div className="file-name-edit">
+                                                <input
+                                                    type="text"
+                                                    value={editingName}
+                                                    onChange={(e) => setEditingName(e.target.value)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            handleConfirmRename(file.id);
+                                                        } else if (e.key === 'Escape') {
+                                                            handleCancelRename();
+                                                        }
+                                                    }}
+                                                    autoFocus
+                                                />
+                                                <button
+                                                    className="btn-icon"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
                                                         handleConfirmRename(file.id);
-                                                    } else if (e.key === 'Escape') {
+                                                    }}
+                                                >
+                                                    <Check size={14} />
+                                                </button>
+                                                <button
+                                                    className="btn-icon"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
                                                         handleCancelRename();
-                                                    }
-                                                }}
-                                                autoFocus
-                                            />
-                                            <button
-                                                className="btn-icon"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleConfirmRename(file.id);
-                                                }}
-                                            >
-                                                <Check size={14} />
-                                            </button>
-                                            <button
-                                                className="btn-icon"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCancelRename();
-                                                }}
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="file-name">{file.name}</div>
-                                            <div className="file-meta">
-                                                Updated: {formatDate(file.updatedAt)}
+                                                    }}
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
-                                        </>
-                                    )}
+                                        ) : (
+                                            <>
+                                                <div className="file-name">{file.name}</div>
+                                                <div className="file-meta">
+                                                    Updated: {formatDate(file.updatedAt)}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
+                                {editingId !== file.id && (
+                                    <div className="file-actions">
+                                        <button
+                                            className="btn-icon"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleStartRename(file);
+                                            }}
+                                            title="Rename"
+                                        >
+                                            <Edit2 size={14} />
+                                        </button>
+                                        <button
+                                            className="btn-icon btn-danger"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteFile(file.id);
+                                            }}
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                            {editingId !== file.id && (
+                        ))
+                    ) : (
+                        images.map(image => (
+                            <div key={image.id} className="file-item">
+                                <div className="file-item-main">
+                                    <Image size={16} className="file-icon" />
+                                    <div className="file-info">
+                                        <div className="file-name">{image.name}</div>
+                                        <div className="file-meta">
+                                            Added: {formatDate(new Date(image.timestamp).toISOString())}
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="file-actions">
                                     <button
                                         className="btn-icon"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleStartRename(file);
-                                        }}
-                                        title="Rename"
+                                        onClick={() => handlePreviewImage(image)}
+                                        title="Preview"
                                     >
-                                        <Edit2 size={14} />
+                                        <Eye size={14} />
+                                    </button>
+                                    <button
+                                        className="btn-icon"
+                                        onClick={() => handleCopyLink(image.id)}
+                                        title="Copy Link"
+                                    >
+                                        <Link size={14} />
                                     </button>
                                     <button
                                         className="btn-icon btn-danger"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteFile(file.id);
-                                        }}
+                                        onClick={() => handleDeleteImage(image.id)}
                                         title="Delete"
                                     >
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
-                            )}
-                        </div>
-                    ))}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
+
+            {/* 图片预览模态框 */}
+            {previewImage && (
+                <div className="image-preview-overlay" onClick={handleClosePreview}>
+                    <div className="image-preview-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="image-preview-header">
+                            <h3>{previewImage.name}</h3>
+                            <button className="btn-close" onClick={handleClosePreview}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="image-preview-content">
+                            <img src={previewImage.data} alt={previewImage.name} />
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
