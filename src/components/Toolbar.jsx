@@ -1,4 +1,4 @@
-import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw } from 'lucide-react';
+import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw, File } from 'lucide-react';
 import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import './Toolbar.css';
@@ -13,6 +13,7 @@ function Toolbar({
     theme, setTheme,
     fontFamily, setFontFamily,
     previewRef,
+    onFileClick,
     // 添加reset功能所需的默认值
     defaultColumns,
     defaultFontSize,
@@ -175,6 +176,14 @@ function Toolbar({
             </div>
 
             <div className="toolbar-right">
+                <button
+                    className="btn btn-secondary"
+                    onClick={onFileClick}
+                    title="Manage files"
+                >
+                    <File size={16} />
+                    Files
+                </button>
                 <button
                     className="btn btn-primary"
                     onClick={handleExportPDF}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
+import FilePanel from './components/FilePanel';
 import { useLocalStorage } from './utils/useLocalStorage';
 import './App.css';
 
@@ -96,23 +97,31 @@ pie title Programming Languages Usage
 `;
 
 function App() {
-  const [markdown, setMarkdown] = useLocalStorage('cheatsheet_markdown', defaultMarkdown);
+  const [markdown, setMarkdown] = useState('');
   const [columns, setColumns] = useLocalStorage('cheatsheet_columns', 5);
   const [fontSize, setFontSize] = useLocalStorage('cheatsheet_fontSize', 8);
-  const [padding, setPadding] = useLocalStorage('cheatsheet_padding', 5); // mm
-  const [gap, setGap] = useLocalStorage('cheatsheet_gap', 1); // mm
+  const [padding, setPadding] = useLocalStorage('cheatsheet_padding', 5);
+  const [gap, setGap] = useLocalStorage('cheatsheet_gap', 1);
   const [lineHeight, setLineHeight] = useLocalStorage('cheatsheet_lineHeight', 1.2);
-  const [scale, setScale] = useState(0.6); // Don't persist scale, start with a reasonable default
+  const [scale, setScale] = useState(0.6);
   const [orientation, setOrientation] = useLocalStorage('cheatsheet_orientation', 'landscape');
   const [theme, setTheme] = useLocalStorage('cheatsheet_theme', 'classic');
   const [fontFamily, setFontFamily] = useLocalStorage('cheatsheet_fontFamily', 'inter');
   const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
-  const [liveUpdate, setLiveUpdate] = useState(true); // 控制PDF预览的实时更新
+  const [liveUpdate, setLiveUpdate] = useState(true);
+  const [isFilePanelOpen, setIsFilePanelOpen] = useState(false);
+  const [currentFile, setCurrentFile] = useState(null);
+
   const previewRef = useRef(null);
   const previewContainerRef = useRef(null);
   const editorRef = useRef(null);
+  const markdownRef = useRef(markdown);
 
-  // 定义默认值常量
+  // 保持 markdownRef 同步
+  useEffect(() => {
+    markdownRef.current = markdown;
+  }, [markdown]);
+
   const defaultValues = {
     columns: 5,
     fontSize: 8,
@@ -122,6 +131,74 @@ function App() {
     orientation: 'landscape',
     theme: 'classic',
     fontFamily: 'inter'
+  };
+
+  // 初始化当前文件
+  useEffect(() => {
+    const savedFiles = localStorage.getItem('cheatsheet_files');
+    if (savedFiles) {
+      try {
+        const parsedFiles = JSON.parse(savedFiles);
+        if (parsedFiles.length > 0) {
+          setCurrentFile(parsedFiles[0]);
+          setMarkdown(parsedFiles[0].content);
+        }
+      } catch (e) {
+        console.error('Failed to parse saved files:', e);
+      }
+    } else {
+      const defaultFile = {
+        id: Date.now(),
+        name: 'Untitled',
+        content: defaultMarkdown,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      setCurrentFile(defaultFile);
+      setMarkdown(defaultMarkdown);
+      localStorage.setItem('cheatsheet_files', JSON.stringify([defaultFile]));
+    }
+  }, []);
+
+  // 保存当前文件到 localStorage (使用 ref 获取最新值)
+  const saveCurrentFile = () => {
+    if (!currentFile) return;
+
+    const savedFiles = localStorage.getItem('cheatsheet_files');
+    if (savedFiles) {
+      try {
+        const parsedFiles = JSON.parse(savedFiles);
+        const updatedFiles = parsedFiles.map(f =>
+          f.id === currentFile.id
+            ? { ...f, content: markdownRef.current, updatedAt: new Date().toISOString() }
+            : f
+        );
+        localStorage.setItem('cheatsheet_files', JSON.stringify(updatedFiles));
+        console.log('Saved current file:', currentFile.name, 'Content length:', markdownRef.current.length);
+      } catch (e) {
+        console.error('Failed to save current file:', e);
+      }
+    }
+  };
+
+  // 处理文件切换
+  const handleFileChange = (file) => {
+    // 先保存当前文件
+    saveCurrentFile();
+    // 再切换到新文件
+    setCurrentFile(file);
+    setMarkdown(file.content);
+    setIsFilePanelOpen(false);
+  };
+
+  // 处理新建文件
+  const handleNewFile = (file) => {
+    // 先保存当前文件
+    saveCurrentFile();
+    // 再切换到新文件
+    setCurrentFile(file);
+    setMarkdown(file.content);
+    setIsFilePanelOpen(false);
   };
 
   useEffect(() => {
@@ -167,7 +244,7 @@ function App() {
         fontFamily={fontFamily}
         setFontFamily={setFontFamily}
         previewRef={previewRef}
-        // 传递默认值
+        onFileClick={() => setIsFilePanelOpen(true)}
         defaultColumns={defaultValues.columns}
         defaultFontSize={defaultValues.fontSize}
         defaultPadding={defaultValues.padding}
@@ -177,9 +254,18 @@ function App() {
         defaultTheme={defaultValues.theme}
         defaultFontFamily={defaultValues.fontFamily}
       />
+      <FilePanel
+        isOpen={isFilePanelOpen}
+        onClose={() => setIsFilePanelOpen(false)}
+        currentFile={currentFile}
+        onFileChange={handleFileChange}
+        onNewFile={handleNewFile}
+        markdown={markdown}
+      />
       <div className="main-content">
         <div className="editor-panel" style={{ width: `${splitSize}%` }}>
           <Editor
+            key={currentFile?.id}
             ref={editorRef}
             markdown={markdown}
             setMarkdown={setMarkdown}
