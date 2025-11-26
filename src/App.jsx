@@ -181,6 +181,18 @@ function App() {
     }
   };
 
+  // 自动保存当前文件
+  useEffect(() => {
+    if (!currentFile) return;
+    
+    // 使用防抖避免过于频繁的保存操作
+    const timer = setTimeout(() => {
+      saveCurrentFile();
+    }, 1000); // 1秒防抖
+    
+    return () => clearTimeout(timer);
+  }, [markdown, currentFile]); // 当markdown或currentFile变化时触发保存
+
   // 处理文件切换
   const handleFileChange = (file) => {
     // 先保存当前文件
