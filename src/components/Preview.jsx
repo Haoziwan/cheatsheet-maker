@@ -527,15 +527,13 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     style={{ position: 'absolute', left: '-9999px', top: '-9999px', visibility: 'hidden' }}
                     className="md-measurer"
                 >
-                    {liveUpdate && (
-                        <ReactMarkdown
-                            remarkPlugins={[remarkMath, remarkGfm]}
-                            rehypePlugins={[rehypeKatex]}
-                            components={components}
-                        >
-                            {preprocessedMarkdown}
-                        </ReactMarkdown>
-                    )}
+                    <ReactMarkdown
+                        remarkPlugins={[remarkMath, remarkGfm]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={components}
+                    >
+                        {preprocessedMarkdown}
+                    </ReactMarkdown>
                 </div>
             </div>
         </div>
