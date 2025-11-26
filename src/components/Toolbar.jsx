@@ -1,4 +1,4 @@
-import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw, File } from 'lucide-react';
+import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw, File, Sun, Moon } from 'lucide-react';
 import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import './Toolbar.css';
@@ -12,6 +12,7 @@ function Toolbar({
     orientation, setOrientation,
     theme, setTheme,
     fontFamily, setFontFamily,
+    appTheme, setAppTheme,
     previewRef,
     onFileClick,
     // 添加reset功能所需的默认值
@@ -22,7 +23,8 @@ function Toolbar({
     defaultLineHeight,
     defaultOrientation,
     defaultTheme,
-    defaultFontFamily
+    defaultFontFamily,
+    defaultAppTheme
 }) {
     const handleExportPDF = () => {
         // Trigger browser print dialog
@@ -41,6 +43,9 @@ function Toolbar({
         setOrientation(defaultOrientation);
         setTheme(defaultTheme);
         setFontFamily(defaultFontFamily);
+        if (setAppTheme && defaultAppTheme) {
+            setAppTheme(defaultAppTheme);
+        }
     };
 
     return (
@@ -176,6 +181,15 @@ function Toolbar({
             </div>
 
             <div className="toolbar-right">
+                {setAppTheme && (
+                    <button
+                        className="btn btn-secondary btn-icon"
+                        onClick={() => setAppTheme(appTheme === 'dark' ? 'light' : 'dark')}
+                        title={`Switch to ${appTheme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                    >
+                        {appTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                    </button>
+                )}
                 <button
                     className="btn btn-secondary"
                     onClick={onFileClick}
@@ -189,7 +203,7 @@ function Toolbar({
                     onClick={handleExportPDF}
                 >
                     <Download size={16} />
-                    Export PDF
+                    PDF
                 </button>
             </div>
         </div>

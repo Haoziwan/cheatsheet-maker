@@ -22,7 +22,7 @@ const preprocessMarkdown = (markdown) => {
     return markdown.replace(/\*\*([^*]+?)([：:;,!?。，；！？\)\]\}\"'》>\\-–—\\/\\\\|@#$%^&*+=~`])\*\*/g, '**$1$2** ');
 };
 
-const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
+const Editor = forwardRef(({ markdown, setMarkdown, appTheme }, ref) => {
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const previewRef = useRef(null);
@@ -385,7 +385,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
             />
             <div className="editor-header">
                 <div className="editor-header-left">
-                    <button 
+                    <button
                         className="outline-toggle-btn"
                         onClick={() => setIsOutlineOpen(!isOutlineOpen)}
                         title={isOutlineOpen ? "Hide Outline" : "Show Outline"}
@@ -448,7 +448,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
             <div className="editor-content">
                 {isOutlineOpen && (
                     <div className="outline-panel">
-                        <Outline 
+                        <Outline
                             markdown={markdown}
                             onHeadingClick={(lineNumber) => {
                                 if (editorRef.current) {
@@ -464,7 +464,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                     <MonacoEditor
                         height="100%"
                         language="markdown"
-                        theme="vs-dark"
+                        theme={appTheme === 'dark' ? 'vs-dark' : 'light'}
                         defaultValue={markdown}
                         onChange={handleEditorChange}
                         onMount={handleEditorDidMount}

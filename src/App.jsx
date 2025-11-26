@@ -107,6 +107,7 @@ function App() {
   const [orientation, setOrientation] = useLocalStorage('cheatsheet_orientation', 'landscape');
   const [theme, setTheme] = useLocalStorage('cheatsheet_theme', 'classic');
   const [fontFamily, setFontFamily] = useLocalStorage('cheatsheet_fontFamily', 'inter');
+  const [appTheme, setAppTheme] = useLocalStorage('cheatsheet_app_theme', 'dark');
   const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
   const [liveUpdate, setLiveUpdate] = useState(true);
   const [isFilePanelOpen, setIsFilePanelOpen] = useState(false);
@@ -122,6 +123,11 @@ function App() {
     markdownRef.current = markdown;
   }, [markdown]);
 
+  // Apply app theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', appTheme);
+  }, [appTheme]);
+
   const defaultValues = {
     columns: 5,
     fontSize: 8,
@@ -130,7 +136,8 @@ function App() {
     lineHeight: 1.2,
     orientation: 'landscape',
     theme: 'classic',
-    fontFamily: 'inter'
+    fontFamily: 'inter',
+    appTheme: 'dark'
   };
 
   // 初始化当前文件
@@ -146,7 +153,7 @@ function App() {
           );
           setCurrentFile(sortedFiles[0]);
           setMarkdown(sortedFiles[0].content);
-          
+
           // Load toolbar settings from the current file if they exist
           if (sortedFiles[0].toolbarSettings) {
             const settings = sortedFiles[0].toolbarSettings;
@@ -186,7 +193,7 @@ function App() {
       localStorage.setItem('cheatsheet_files', JSON.stringify([defaultFile]));
     }
   }, []);
-  
+
   // 保存当前文件到 localStorage (使用 ref 获取最新值)
   const saveCurrentFile = () => {
     if (!currentFile) return;
@@ -197,21 +204,21 @@ function App() {
         const parsedFiles = JSON.parse(savedFiles);
         const updatedFiles = parsedFiles.map(f =>
           f.id === currentFile.id
-            ? { 
-                ...f, 
-                content: markdownRef.current, 
-                updatedAt: new Date().toISOString(),
-                toolbarSettings: {
-                  columns,
-                  fontSize,
-                  padding,
-                  gap,
-                  lineHeight,
-                  orientation,
-                  theme,
-                  fontFamily
-                }
+            ? {
+              ...f,
+              content: markdownRef.current,
+              updatedAt: new Date().toISOString(),
+              toolbarSettings: {
+                columns,
+                fontSize,
+                padding,
+                gap,
+                lineHeight,
+                orientation,
+                theme,
+                fontFamily
               }
+            }
             : f
         );
         localStorage.setItem('cheatsheet_files', JSON.stringify(updatedFiles));
@@ -225,12 +232,12 @@ function App() {
   // 自动保存当前文件
   useEffect(() => {
     if (!currentFile) return;
-    
+
     // 使用防抖避免过于频繁的保存操作
     const timer = setTimeout(() => {
       saveCurrentFile();
     }, 1000); // 1秒防抖
-    
+
     return () => clearTimeout(timer);
   }, [markdown, currentFile]); // 当markdown或currentFile变化时触发保存
 
@@ -241,7 +248,7 @@ function App() {
     // 再切换到新文件
     setCurrentFile(file);
     setMarkdown(file.content);
-    
+
     // Load toolbar settings from the selected file if they exist
     if (file.toolbarSettings) {
       const settings = file.toolbarSettings;
@@ -254,7 +261,7 @@ function App() {
       if (settings.theme !== undefined) setTheme(settings.theme);
       if (settings.fontFamily !== undefined) setFontFamily(settings.fontFamily);
     }
-    
+
     setIsFilePanelOpen(false);
   };
 
@@ -265,7 +272,7 @@ function App() {
     // 再切换到新文件
     setCurrentFile(file);
     setMarkdown(file.content);
-    
+
     // Load toolbar settings from the new file if they exist
     if (file.toolbarSettings) {
       const settings = file.toolbarSettings;
@@ -278,7 +285,7 @@ function App() {
       if (settings.theme !== undefined) setTheme(settings.theme);
       if (settings.fontFamily !== undefined) setFontFamily(settings.fontFamily);
     }
-    
+
     setIsFilePanelOpen(false);
   };
 
@@ -324,6 +331,8 @@ function App() {
         setTheme={setTheme}
         fontFamily={fontFamily}
         setFontFamily={setFontFamily}
+        appTheme={appTheme}
+        setAppTheme={setAppTheme}
         previewRef={previewRef}
         onFileClick={() => setIsFilePanelOpen(true)}
         defaultColumns={defaultValues.columns}
@@ -334,6 +343,7 @@ function App() {
         defaultOrientation={defaultValues.orientation}
         defaultTheme={defaultValues.theme}
         defaultFontFamily={defaultValues.fontFamily}
+        defaultAppTheme={defaultValues.appTheme}
       />
       <FilePanel
         isOpen={isFilePanelOpen}
@@ -360,6 +370,7 @@ function App() {
             ref={editorRef}
             markdown={markdown}
             setMarkdown={setMarkdown}
+            appTheme={appTheme}
           />
         </div>
         <div

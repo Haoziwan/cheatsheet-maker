@@ -32,7 +32,7 @@
     flex: 1;
     overflow: auto;
     padding: var(--spacing-xl);
-    background: #4a4a4a;
+    background: var(--color-bg-preview);
     display: flex;
     align-items: flex-start;
 }
