@@ -3,7 +3,7 @@ import { File, Plus, Trash2, Edit2, Check, X, Image, Copy, Link, Eye } from 'luc
 import imageStorage from '../utils/imageStorage';
 import './FilePanel.css';
 
-function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, markdown }) {
+function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, markdown, toolbarSettings }) {
     const [files, setFiles] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editingName, setEditingName] = useState('');
@@ -31,12 +31,24 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
             }
         } else {
             // 如果没有保存的文件，创建一个默认文件
+            const defaultToolbarSettings = {
+                columns: 5,
+                fontSize: 8,
+                padding: 5,
+                gap: 1,
+                lineHeight: 1.2,
+                orientation: 'landscape',
+                theme: 'classic',
+                fontFamily: 'inter'
+            };
+            
             const defaultFile = {
                 id: Date.now(),
                 name: 'Untitled',
                 content: markdown,
                 createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                toolbarSettings: defaultToolbarSettings
             };
             setFiles([defaultFile]);
             localStorage.setItem('cheatsheet_files', JSON.stringify([defaultFile]));
@@ -72,7 +84,17 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
             name: 'Untitled',
             content: '',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+            toolbarSettings: toolbarSettings || {
+                columns: 5,
+                fontSize: 8,
+                padding: 5,
+                gap: 1,
+                lineHeight: 1.2,
+                orientation: 'landscape',
+                theme: 'classic',
+                fontFamily: 'inter'
+            }
         };
         const updatedFiles = [...files, newFile];
         saveFiles(updatedFiles);
