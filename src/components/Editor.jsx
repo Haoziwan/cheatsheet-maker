@@ -480,7 +480,6 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                         }}
                     />
                 </div>
-                <div className="resize-handle resize-handle-editor"></div>
                 <div
                     ref={previewRef}
                     className={`editor-pane editor-pane-preview ${viewMode === 'edit' ? 'hidden' : ''} ${viewMode === 'split' ? 'split' : ''}`}
