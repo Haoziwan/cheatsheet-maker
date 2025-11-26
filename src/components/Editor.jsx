@@ -22,7 +22,7 @@ const preprocessMarkdown = (markdown) => {
     return markdown.replace(/\*\*([^*]+?)([：:;,!?。，；！？\)\]\}\"'》>\\-–—\\/\\\\|@#$%^&*+=~`])\*\*/g, '**$1$2** ');
 };
 
-const Editor = forwardRef(({ markdown, setMarkdown, appTheme }, ref) => {
+const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref) => {
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const previewRef = useRef(null);
@@ -376,6 +376,12 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme }, ref) => {
 
     const [isOutlineOpen, setIsOutlineOpen] = useState(false);
 
+    // 生成安全的文件名
+    const sanitizeFileName = (fileName) => {
+        // Windows/Linux/macOS 不允许的字符: \ / : * ? " < > |
+        return fileName.replace(/[\\/:*?"<>|]/g, '_');
+    };
+
     return (
         <div className={`editor ${isFullscreen ? 'editor-fullscreen' : ''}`}>
             <FormattingToolbar
@@ -426,7 +432,11 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme }, ref) => {
                             const url = URL.createObjectURL(blob);
                             const a = document.createElement('a');
                             a.href = url;
-                            a.download = 'cheatsheet.md';
+                            // 使用当前文件名，如果不存在则使用默认名称
+                            const fileName = currentFile?.name ? sanitizeFileName(currentFile.name) : 'untitled';
+                            // 确保文件名以 .md 结尾
+                            const finalFileName = fileName.endsWith('.md') ? fileName : `${fileName}.md`;
+                            a.download = finalFileName;
                             document.body.appendChild(a);
                             a.click();
                             document.body.removeChild(a);

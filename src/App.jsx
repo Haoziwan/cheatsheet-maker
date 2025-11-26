@@ -371,6 +371,7 @@ function App() {
             markdown={markdown}
             setMarkdown={setMarkdown}
             appTheme={appTheme}
+            currentFile={currentFile}
           />
         </div>
         <div
