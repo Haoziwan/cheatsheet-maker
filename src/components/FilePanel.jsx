@@ -10,6 +10,39 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
     const [images, setImages] = useState([]);
     const [showImages, setShowImages] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
+    const [showTemplates, setShowTemplates] = useState(false); // 新增状态用于显示模板选项
+
+    // 定义模板配置
+    const templates = {
+        note: {
+            name: 'Note Template',
+            description: 'Simple vertical layout with single column',
+            toolbarSettings: {
+                columns: 1,
+                fontSize: 12,
+                padding: 15,
+                gap: 5,
+                lineHeight: 1.5,
+                orientation: 'portrait',
+                theme: 'classic',
+                fontFamily: 'inter'
+            }
+        },
+        cheatsheet: {
+            name: 'Cheatsheet Template',
+            description: 'Default cheatsheet layout',
+            toolbarSettings: {
+                columns: 5,
+                fontSize: 8,
+                padding: 5,
+                gap: 1,
+                lineHeight: 1.2,
+                orientation: 'landscape',
+                theme: 'classic',
+                fontFamily: 'inter'
+            }
+        }
+    };
 
     // 从 localStorage 加载文件列表（每次打开面板时重新加载）
     useEffect(() => {
@@ -99,6 +132,23 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
         const updatedFiles = [...files, newFile];
         saveFiles(updatedFiles);
         onNewFile(newFile);
+    };
+
+    // 基于模板创建新文件
+    const handleCreateFromTemplate = (templateKey) => {
+        const template = templates[templateKey];
+        const newFile = {
+            id: Date.now(),
+            name: `${template.name}`,
+            content: '', // 模板不保存内容
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            toolbarSettings: { ...template.toolbarSettings }
+        };
+        const updatedFiles = [...files, newFile];
+        saveFiles(updatedFiles);
+        onNewFile(newFile);
+        setShowTemplates(false); // 创建后关闭模板选择界面
     };
 
     // 删除文件
@@ -216,17 +266,26 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                 </div>
 
                 <div className="file-panel-actions">
-                    {!showImages ? (
+                    {!showImages && !showTemplates ? (
                         <>
                             <button className="btn btn-primary" onClick={handleNewFile}>
                                 <Plus size={16} />
                                 New File
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => setShowTemplates(true)}>
+                                <Plus size={16} />
+                                Template
                             </button>
                             <button className="btn btn-secondary" onClick={() => setShowImages(true)}>
                                 <Image size={16} />
                                 Images
                             </button>
                         </>
+                    ) : showTemplates ? (
+                        <button className="btn btn-secondary" onClick={() => setShowTemplates(false)}>
+                            <File size={16} />
+                            Back to Files
+                        </button>
                     ) : (
                         <button className="btn btn-secondary" onClick={() => setShowImages(false)}>
                             <File size={16} />
@@ -236,7 +295,7 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                 </div>
 
                 <div className="file-list">
-                    {!showImages ? (
+                    {!showImages && !showTemplates ? (
                         files.map(file => (
                             <div
                                 key={file.id}
@@ -314,6 +373,24 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                                         </button>
                                     </div>
                                 )}
+                            </div>
+                        ))
+                    ) : showTemplates ? (
+                        Object.entries(templates).map(([key, template]) => (
+                            <div
+                                key={key}
+                                className="file-item template-item"
+                                onClick={() => handleCreateFromTemplate(key)}
+                            >
+                                <div className="file-item-main">
+                                    <File size={16} className="file-icon" />
+                                    <div className="file-info">
+                                        <div className="file-name">{template.name}</div>
+                                        <div className="file-meta">
+                                            {template.description}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ))
                     ) : (

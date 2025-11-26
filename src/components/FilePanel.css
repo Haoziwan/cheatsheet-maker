@@ -202,6 +202,15 @@
     opacity: 1;
 }
 
+.template-item {
+    border: 1px dashed var(--color-border);
+}
+
+.template-item:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-accent-primary);
+}
+
 .btn-icon {
     background: none;
     border: none;
