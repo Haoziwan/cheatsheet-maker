@@ -55,7 +55,7 @@ function Toolbar({
                     <a href="https://github.com/Haoziwan/cheatsheet-maker" target="_blank" rel="noopener noreferrer">
                         <Github size={20} />
                     </a>
-                    <h1>cheatsheet maker</h1>
+                    <h1>Cheatsheet Maker</h1>
                 </div>
             </div>
 
@@ -151,7 +151,7 @@ function Toolbar({
                     />
                 </div>
 
-                <div className="toolbar-control">
+                <div className="toolbar-control orientation-control">
                     <label className="label">Orientation</label>
                     <div className="orientation-toggle">
                         <button

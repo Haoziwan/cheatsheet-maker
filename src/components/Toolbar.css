@@ -57,7 +57,12 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
+    gap: 1px; /* Reduced gap for tighter alignment */
+}
+
+.toolbar-control.orientation-control {
+    align-items: center;
+    margin-left: var(--spacing-md); /* Move orientation control to the right */
 }
 
 .label {
@@ -66,10 +71,12 @@
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1; /* Ensure tight alignment */
+    margin-bottom: 1px; /* Add slight margin for better visual alignment */
 }
 
 .select {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 2px var(--spacing-sm); /* Reduced top/bottom padding */
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-bg-primary);
@@ -78,6 +85,7 @@
     outline: none;
     cursor: pointer;
     width: 100px; /* Added fixed width */
+    height: 24px; /* Fixed height for consistent alignment */
 }
 
 .select:focus {
@@ -86,13 +94,14 @@
 
 .number-input {
     width: 60px; /* Increased from 50px to 60px */
-    padding: 4px 8px;
+    padding: 2px 8px; /* Reduced top/bottom padding to match select */
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-size: 0.875rem;
     outline: none;
+    height: 24px; /* Fixed height for consistent alignment */
 }
 
 .number-input:focus {
@@ -166,14 +175,32 @@
 
 .orientation-toggle {
     display: flex;
-    gap: 4px;
+    gap: 2px; /* Reduced gap for tighter alignment */
     background: var(--color-bg-primary);
-    padding: 2px;
+    padding: 1px; /* Reduced padding */
     border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
+    height: 24px; /* Match height of other controls */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    width: fit-content; /* Adjust width to content */
 }
 
 .icon-btn.active {
     background: var(--color-bg-tertiary);
     color: var(--color-accent-primary);
+}
+
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
 }
