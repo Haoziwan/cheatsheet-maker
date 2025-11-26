@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import MermaidDiagram from './MermaidDiagram';
@@ -529,7 +530,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 >
                     <ReactMarkdown
                         remarkPlugins={[remarkMath, remarkGfm]}
-                        rehypePlugins={[rehypeKatex]}
+                        rehypePlugins={[rehypeKatex, rehypeRaw]}
                         components={components}
                     >
                         {preprocessedMarkdown}

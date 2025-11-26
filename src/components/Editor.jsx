@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import { Eye, Edit3, Columns, Download, Maximize, X } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import MermaidDiagram from './MermaidDiagram';
@@ -464,7 +465,7 @@ const Editor = forwardRef(({ markdown, setMarkdown }, ref) => {
                         <div className="markdown-body">
                             <ReactMarkdown
                                 remarkPlugins={[remarkMath, remarkGfm]}
-                                rehypePlugins={[rehypeKatex]}
+                                rehypePlugins={[rehypeKatex, rehypeRaw]}
                                 components={components}
                             >
                                 {preprocessedMarkdown}
