@@ -140,8 +140,12 @@ function App() {
       try {
         const parsedFiles = JSON.parse(savedFiles);
         if (parsedFiles.length > 0) {
-          setCurrentFile(parsedFiles[0]);
-          setMarkdown(parsedFiles[0].content);
+          // 按更新时间排序，最新的在最上面
+          const sortedFiles = parsedFiles.sort((a, b) =>
+            new Date(b.updatedAt) - new Date(a.updatedAt)
+          );
+          setCurrentFile(sortedFiles[0]);
+          setMarkdown(sortedFiles[0].content);
         }
       } catch (e) {
         console.error('Failed to parse saved files:', e);
