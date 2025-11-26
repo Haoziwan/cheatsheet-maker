@@ -20,7 +20,6 @@ export const themes = {
             h1: {
                 fontSize: '1.8em',
                 fontWeight: '700',
-                color: '#000000',
                 borderBottom: '2px solid #333',
                 paddingBottom: '0.2em',
                 margin: '0.5em 0 0.3em 0',
@@ -28,7 +27,6 @@ export const themes = {
             h2: {
                 fontSize: '1.4em',
                 fontWeight: '600',
-                color: '#2a2a2a',
                 borderBottom: '1px solid #666',
                 paddingBottom: '0.15em',
                 margin: '0.4em 0 0.25em 0',
@@ -36,13 +34,11 @@ export const themes = {
             h3: {
                 fontSize: '1.2em',
                 fontWeight: '600',
-                color: '#333',
                 margin: '0.3em 0 0.2em 0',
             },
             h4: {
                 fontSize: '1.1em',
                 fontWeight: '600',
-                color: '#444',
                 margin: '0.25em 0 0.15em 0',
             },
             codeInline: {
@@ -66,16 +62,11 @@ export const themes = {
             },
             blockquote: {
                 borderLeft: '3px solid #666',
-                paddingLeft: '0.8em',
                 color: '#555',
                 fontStyle: 'italic',
             },
             strong: {
                 fontWeight: '700',
-                color: '#000000',
-            },
-            paragraph: {
-                color: '#1a1a1a',
             },
             table: {
                 borderColor: '#ddd',

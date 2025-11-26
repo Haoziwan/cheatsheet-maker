@@ -90,8 +90,7 @@ pie title Programming Languages Usage
 ` + '```' + `
 
 ## HTML Support
-
-<div style="background-color: #e8f4fd; padding: 15px; border-left: 4px solid #2196F3; border-radius: 4px;">
+<div style="background-color: #e8f4fd; padding: 15px; border-left: 4px solid #2196F3; border-radius: 4px; color: green;">
   <p>This is a <strong>HTML div element</strong> with inline styles.</p>
 </div>
 `;
