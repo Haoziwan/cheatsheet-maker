@@ -307,3 +307,8 @@
     border-radius: 2px;
     opacity: 0.5;
 }
+/* 1. 强制提升搜索框层级，防止被外部遮挡 */
+.monaco-editor .find-widget {
+    z-index: 10000 !important;
+
+}
