@@ -15,6 +15,7 @@ function Toolbar({
     appTheme, setAppTheme,
     previewRef,
     onFileClick,
+    currentFile, // Add currentFile prop
     // 添加reset功能所需的默认值
     defaultColumns,
     defaultFontSize,
@@ -27,10 +28,28 @@ function Toolbar({
     defaultAppTheme
 }) {
     const handleExportPDF = () => {
+        // Save the original title
+        const originalTitle = document.title;
+        
+        // Set document title to current file name (if available)
+        if (currentFile && currentFile.name) {
+            // Sanitize filename by removing extension if present
+            let fileName = currentFile.name;
+            if (fileName.endsWith('.md')) {
+                fileName = fileName.slice(0, -3);
+            }
+            document.title = fileName;
+        }
+        
         // Trigger browser print dialog
         // The @media print styles in Preview.css will handle the layout
         // to ensure only the preview pages are printed in A4 landscape
         window.print();
+        
+        // Restore original title after a short delay
+        setTimeout(() => {
+            document.title = originalTitle;
+        }, 1000);
     };
 
     // 添加reset功能

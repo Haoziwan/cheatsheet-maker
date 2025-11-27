@@ -344,6 +344,7 @@ function App() {
         defaultTheme={defaultValues.theme}
         defaultFontFamily={defaultValues.fontFamily}
         defaultAppTheme={defaultValues.appTheme}
+        currentFile={currentFile} // Pass currentFile to Toolbar
       />
       <FilePanel
         isOpen={isFilePanelOpen}
