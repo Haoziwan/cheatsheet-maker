@@ -9,7 +9,7 @@ A React-based application for creating and exporting cheatsheets as PDF document
 
 ## Features
 
-- Real-time Markdown editing with syntax highlighting
+- Real-time Markdown editing
 - Live preview of formatted Markdown content
 - PDF export via browser print functionality
 - Customizable multi-column layout settings
@@ -20,6 +20,7 @@ A React-based application for creating and exporting cheatsheets as PDF document
 
 - Automatic saving settings using localStorage
 - Create, rename, delete, and switch between multiple files
+- Push and pull files to/from GitHub repositories for backup and synchronization
 
 ## Tech Stack
 
