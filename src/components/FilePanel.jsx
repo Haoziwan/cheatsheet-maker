@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { File, Plus, Trash2, Edit2, Check, X, Image, Copy, Link, Eye } from 'lucide-react';
+import { File, Plus, Trash2, Edit2, Check, X, Image, Copy, Link, Eye, Github } from 'lucide-react';
 import imageStorage from '../utils/imageStorage';
+import githubSync from '../utils/githubSync';
+import SyncSettings from './SyncSettings';
 import './FilePanel.css';
 
 function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, markdown, toolbarSettings }) {
@@ -10,7 +12,8 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
     const [images, setImages] = useState([]);
     const [showImages, setShowImages] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
-    const [showTemplates, setShowTemplates] = useState(false); // 新增状态用于显示模板选项
+    const [showTemplates, setShowTemplates] = useState(false);
+    const [showSync, setShowSync] = useState(false);
 
     // 定义模板配置
     const templates = {
@@ -74,7 +77,7 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                 theme: 'classic',
                 fontFamily: 'inter'
             };
-            
+
             const defaultFile = {
                 id: Date.now(),
                 name: 'Untitled',
@@ -245,6 +248,25 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
         });
     };
 
+    const handleSyncFiles = async (token, owner, repo) => {
+        // 1. Upload index file (metadata)
+        const indexContent = JSON.stringify(files.map(f => ({
+            id: f.id,
+            name: f.name,
+            createdAt: f.createdAt,
+            updatedAt: f.updatedAt,
+            toolbarSettings: f.toolbarSettings
+        })), null, 2);
+
+        await githubSync.uploadFile(token, owner, repo, 'files.json', indexContent, 'Update file index');
+
+        // 2. Upload each file content
+        for (const file of files) {
+            const filename = `content/${file.id}.md`;
+            await githubSync.uploadFile(token, owner, repo, filename, file.content, `Update ${file.name}`);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -260,9 +282,14 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                             </div>
                         )}
                     </div>
-                    <button className="btn-close" onClick={onClose}>
-                        <X size={20} />
-                    </button>
+                    <div className="header-actions">
+                        <button className="btn-icon" onClick={() => setShowSync(true)} title="Sync to GitHub">
+                            <Github size={20} />
+                        </button>
+                        <button className="btn-close" onClick={onClose}>
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="file-panel-actions">
@@ -450,6 +477,12 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                     </div>
                 </div>
             )}
+
+            <SyncSettings
+                isOpen={showSync}
+                onClose={() => setShowSync(false)}
+                onSync={handleSyncFiles}
+            />
         </>
     );
 }

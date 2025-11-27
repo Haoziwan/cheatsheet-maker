@@ -39,6 +39,12 @@
     gap: 4px;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .file-panel-header h2 {
     margin: 0;
     font-size: 18px;
