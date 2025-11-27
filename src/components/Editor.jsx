@@ -170,8 +170,9 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                             const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
                             const path = `images/${timestamp}_${safeName}`;
 
-                            const result = await githubSync.uploadImage(token, userLogin, repo, path, base64Content, `Upload image ${file.name}`);
-                            imageReference = result.content.download_url;
+                            await githubSync.uploadImage(token, userLogin, repo, path, base64Content, `Upload image ${file.name}`);
+                            // Use permanent raw content URL instead of temporary download_url
+                            imageReference = `https://raw.githubusercontent.com/${userLogin}/${repo}/main/${path}`;
                         } catch (ghError) {
                             console.error('GitHub upload failed, falling back to local:', ghError);
                             // Fallback to Local IndexedDB

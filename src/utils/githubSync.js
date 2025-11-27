@@ -44,7 +44,7 @@ class GithubSync {
             body: JSON.stringify({
                 name,
                 description: 'Created by Cheatsheet Maker',
-                private: true,
+                private: false,  // Public repo for image accessibility
                 auto_init: true
             })
         });
