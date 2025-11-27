@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { File, Plus, Trash2, Edit2, Check, X, Image, Copy, Link, Eye, Github } from 'lucide-react';
+import { File, Plus, Trash2, Edit2, Check, X, Image, Copy, Link, Eye, Github, Cloud } from 'lucide-react';
 import imageStorage from '../utils/imageStorage';
 import githubSync from '../utils/githubSync';
 import SyncSettings from './SyncSettings';
@@ -347,7 +347,7 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                     </div>
                     <div className="header-actions">
                         <button className="btn-icon" onClick={() => setShowSync(true)} title="Sync to GitHub">
-                            <Github size={20} />
+                            <Cloud size={20} />
                         </button>
                         <button className="btn-close" onClick={onClose}>
                             <X size={20} />

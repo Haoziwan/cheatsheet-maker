@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { Eye, Edit3, Columns, Download, Maximize, X, Menu } from 'lucide-react';
+import { Eye, Edit3, Columns, Download, Maximize, X, Menu, ImagePlus } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
 import MermaidDiagram from './MermaidDiagram';
 import FormattingToolbar from './FormattingToolbar';
@@ -27,6 +27,7 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const previewRef = useRef(null);
+    const imageInputRef = useRef(null);
     const [viewMode, setViewMode] = useState('edit'); // 'edit', 'preview', 'split'
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -77,6 +78,21 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
 
     const [toolbarVisible, setToolbarVisible] = useState(false);
     const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
+
+    // 处理图片按钮点击
+    const handleImageButtonClick = () => {
+        imageInputRef.current?.click();
+    };
+
+    // 处理文件选择
+    const handleFileSelect = async (e) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            await handleImageUpload(files);
+            // 清空input，允许重复选择同一文件
+            e.target.value = '';
+        }
+    };
 
     const handleFormat = (type) => {
         if (!editorRef.current) return;
@@ -460,6 +476,15 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                 position={toolbarPosition}
                 onFormat={handleFormat}
             />
+            {/* Hidden file input for image upload */}
+            <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleFileSelect}
+            />
             <div className="editor-header">
                 <div className="editor-header-left">
                     <button
@@ -495,6 +520,13 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                         title="Preview Only"
                     >
                         <Eye size={14} />
+                    </button>
+                    <button
+                        className="editor-toggle-btn"
+                        onClick={handleImageButtonClick}
+                        title="Upload Image"
+                    >
+                        <ImagePlus size={14} />
                     </button>
                     <button
                         className="editor-download-btn"

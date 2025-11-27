@@ -16,7 +16,7 @@ A React-based application for creating and exporting cheatsheets as PDF document
 - Mathematical expressions with KaTeX (lazy-loaded for performance)
 - HTML support in Markdown 
 - Diagrams with Mermaid
-- drag and drop images directly into the editor (images are stored in IndexedDB, F12 clear site data to remove)
+- Drag and drop images directly into the editor with automatic storage in IndexedDB or using GitHub for remote storage
 
 - Automatic saving settings using localStorage
 - Create, rename, delete, and switch between multiple files
