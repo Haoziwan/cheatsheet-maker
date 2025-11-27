@@ -324,12 +324,12 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
     const debouncedSetMarkdown = useCallback(
         debounce((value) => {
             setMarkdown(value);
-        }, 300),
+        }, 100),
         [setMarkdown]
     );
 
     const handleEditorChange = (value) => {
-        debouncedSetMarkdown(value || '');
+        setMarkdown(value || '');
     };
 
     // Custom components to inject source line numbers
@@ -520,6 +520,39 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                             automaticLayout: true,
                             padding: { top: 16, bottom: 16 },
                             fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+                            // Enable stable input method mode
+                            stablePeek: true,
+                            // Disable autocomplete suggestions
+                            suggest: {
+                                showWords: false,
+                                showSnippets: false,
+                                showKeywords: false,
+                                showClasses: false,
+                                showFunctions: false,
+                                showFields: false,
+                                showInterfaces: false,
+                                showModules: false,
+                                showProperties: false,
+                                showEvents: false,
+                                showOperators: false,
+                                showUnits: false,
+                                showValues: false,
+                                showConstants: false,
+                                showEnums: false,
+                                showEnumMembers: false,
+                                showMethods: false,
+                                showReferences: false,
+                                showColors: false,
+                                showFiles: false,
+                                showTypes: false,
+                                showStructs: false,
+                                showVariables: false,
+                                showIssues: false
+                            },
+                            acceptSuggestionOnCommitCharacter: false,
+                            acceptSuggestionOnEnter: "off",
+                            quickSuggestions: false,
+                            suggestOnTriggerCharacters: false
                         }}
                     />
                 </div>
