@@ -248,7 +248,7 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
         });
     };
 
-    const handleSyncFiles = async (token, owner, repo) => {
+    const handlePushFiles = async (token, owner, repo) => {
         // 1. Upload index file (metadata)
         const indexContent = JSON.stringify(files.map(f => ({
             id: f.id,
@@ -267,6 +267,74 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
         }
     };
 
+    const handlePullFiles = async (token, owner, repo) => {
+        // 1. Get index file
+        const indexContent = await githubSync.getFileContent(token, owner, repo, 'files.json');
+        if (!indexContent) {
+            throw new Error('No files found in repository');
+        }
+
+        const remoteFiles = JSON.parse(indexContent);
+        const mergedFiles = [...files];
+        let updatedCount = 0;
+
+        // 2. Merge files
+        for (const remoteFile of remoteFiles) {
+            const localFileIndex = mergedFiles.findIndex(f => f.id === remoteFile.id);
+            const localFile = mergedFiles[localFileIndex];
+
+            // Determine if we should update (if local doesn't exist or remote is newer)
+            // For simplicity in "Restore" scenario, we can just overwrite if remote exists
+            // But let's check timestamps to be safe, or just overwrite if it's a "Pull" action
+
+            let shouldUpdate = false;
+            if (!localFile) {
+                shouldUpdate = true;
+            } else {
+                const remoteDate = new Date(remoteFile.updatedAt);
+                const localDate = new Date(localFile.updatedAt);
+                if (remoteDate > localDate) {
+                    shouldUpdate = true;
+                }
+            }
+
+            if (shouldUpdate) {
+                const content = await githubSync.getFileContent(token, owner, repo, `content/${remoteFile.id}.md`);
+                if (content !== null) {
+                    const newFile = {
+                        ...remoteFile,
+                        content: content
+                    };
+
+                    if (localFileIndex !== -1) {
+                        mergedFiles[localFileIndex] = newFile;
+                    } else {
+                        mergedFiles.push(newFile);
+                    }
+                    updatedCount++;
+                }
+            }
+        }
+
+        if (updatedCount > 0) {
+            // Sort by updated time
+            mergedFiles.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            saveFiles(mergedFiles);
+
+            // If current file was updated, refresh it
+            if (currentFile) {
+                const updatedCurrent = mergedFiles.find(f => f.id === currentFile.id);
+                if (updatedCurrent && updatedCurrent.updatedAt !== currentFile.updatedAt) {
+                    onFileChange(updatedCurrent);
+                }
+            }
+
+            alert(`Successfully pulled ${updatedCount} files from GitHub.`);
+        } else {
+            alert('Local files are already up to date.');
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -276,11 +344,6 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                 <div className="file-panel-header">
                     <div className="file-panel-header-content">
                         <h2>{showImages ? 'Images' : 'Files'}</h2>
-                        {!showImages && (
-                            <div className="file-panel-notice">
-                                The file may be lost. Please download it locally
-                            </div>
-                        )}
                     </div>
                     <div className="header-actions">
                         <button className="btn-icon" onClick={() => setShowSync(true)} title="Sync to GitHub">
@@ -481,7 +544,8 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
             <SyncSettings
                 isOpen={showSync}
                 onClose={() => setShowSync(false)}
-                onSync={handleSyncFiles}
+                onPush={handlePushFiles}
+                onPull={handlePullFiles}
             />
         </>
     );

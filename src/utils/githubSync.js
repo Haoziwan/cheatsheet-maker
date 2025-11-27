@@ -64,6 +64,19 @@ class GithubSync {
         return await response.json();
     }
 
+    async getFileContent(token, owner, repo, path) {
+        const fileData = await this.getFile(token, owner, repo, path);
+        if (!fileData) return null;
+
+        // Decode Base64 content (handling UTF-8)
+        try {
+            return decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+        } catch (e) {
+            console.error('Failed to decode file content:', e);
+            return atob(fileData.content); // Fallback for simple ASCII
+        }
+    }
+
     async uploadFile(token, owner, repo, path, content, message = 'Update file') {
         // First try to get the file to get its SHA (if it exists)
         const currentFile = await this.getFile(token, owner, repo, path);

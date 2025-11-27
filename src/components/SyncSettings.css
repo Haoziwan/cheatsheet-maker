@@ -163,9 +163,18 @@
     font-size: 14px;
 }
 
+.sync-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
 .btn-block {
     width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    gap: 8px;
     padding: 10px;
 }
 

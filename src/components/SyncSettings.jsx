@@ -4,7 +4,7 @@ import { Github, Save, RefreshCw, LogOut, ExternalLink, Check, AlertCircle } fro
 import githubSync from '../utils/githubSync';
 import './SyncSettings.css';
 
-function SyncSettings({ isOpen, onClose, onSync }) {
+function SyncSettings({ isOpen, onClose, onPush, onPull }) {
     const [token, setToken] = useState('');
     const [user, setUser] = useState(null);
     const [repoName, setRepoName] = useState('cheatsheet-data');
@@ -55,34 +55,41 @@ function SyncSettings({ isOpen, onClose, onSync }) {
         setMessage('');
     };
 
-    const handleSync = async () => {
+    const performSyncAction = async (actionName, actionFn) => {
         if (!user || !token) return;
 
         setStatus('loading');
-        setMessage('Syncing...');
+        setMessage(`${actionName}...`);
 
         try {
-            // Check if repo exists, if not create it
+            // Check if repo exists, if not create it (only for push, but good to check for pull too)
             let repo = await githubSync.getRepo(token, user.login, repoName);
             if (!repo) {
-                setMessage('Creating repository...');
-                repo = await githubSync.createRepo(token, repoName);
+                if (actionName === 'Pushing') {
+                    setMessage('Creating repository...');
+                    repo = await githubSync.createRepo(token, repoName);
+                } else {
+                    throw new Error('Repository not found');
+                }
             }
 
             localStorage.setItem('github_repo', repoName);
 
-            // Call parent sync handler
-            await onSync(token, user.login, repoName);
+            // Call parent handler
+            await actionFn(token, user.login, repoName);
 
             setStatus('success');
-            setMessage('Sync completed successfully!');
+            setMessage(`${actionName} completed successfully!`);
             setTimeout(() => setMessage(`Connected as ${user.login}`), 3000);
         } catch (error) {
             console.error(error);
             setStatus('error');
-            setMessage('Sync failed: ' + error.message);
+            setMessage(`${actionName} failed: ` + error.message);
         }
     };
+
+    const handlePush = () => performSyncAction('Pushing', onPush);
+    const handlePull = () => performSyncAction('Pulling', onPull);
 
     const openTokenPage = () => {
         window.open('https://github.com/settings/tokens/new?scopes=repo&description=CheatsheetMaker', '_blank');
@@ -151,18 +158,32 @@ function SyncSettings({ isOpen, onClose, onSync }) {
                                 />
                             </div>
 
-                            <div className="sync-actions">
+                            <div className="sync-actions-grid">
                                 <button
                                     className="btn btn-primary btn-block"
-                                    onClick={handleSync}
+                                    onClick={handlePush}
                                     disabled={status === 'loading'}
+                                    title="Upload local files to GitHub"
                                 >
-                                    {status === 'loading' ? (
+                                    {status === 'loading' && message.startsWith('Pushing') ? (
                                         <RefreshCw size={16} className="spin" />
                                     ) : (
                                         <Save size={16} />
                                     )}
-                                    {status === 'loading' ? 'Syncing...' : 'Sync Now'}
+                                    Push to Cloud
+                                </button>
+                                <button
+                                    className="btn btn-secondary btn-block"
+                                    onClick={handlePull}
+                                    disabled={status === 'loading'}
+                                    title="Download files from GitHub"
+                                >
+                                    {status === 'loading' && message.startsWith('Pulling') ? (
+                                        <RefreshCw size={16} className="spin" />
+                                    ) : (
+                                        <RefreshCw size={16} />
+                                    )}
+                                    Pull from Cloud
                                 </button>
                             </div>
                         </div>
