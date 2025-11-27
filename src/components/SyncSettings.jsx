@@ -31,6 +31,7 @@ function SyncSettings({ isOpen, onClose, onPush, onPull }) {
             setStatus('success');
             setMessage(`Connected as ${userData.login}`);
             localStorage.setItem('github_token', authToken);
+            localStorage.setItem('github_user', userData.login);
         } catch (error) {
             setStatus('error');
             setMessage('Invalid token');
@@ -49,6 +50,7 @@ function SyncSettings({ isOpen, onClose, onPush, onPull }) {
 
     const handleDisconnect = () => {
         localStorage.removeItem('github_token');
+        localStorage.removeItem('github_user');
         setToken('');
         setUser(null);
         setStatus('idle');

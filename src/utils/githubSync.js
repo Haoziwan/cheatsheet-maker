@@ -102,6 +102,29 @@ class GithubSync {
         if (!response.ok) throw new Error('Failed to upload file');
         return await response.json();
     }
+
+    async uploadImage(token, owner, repo, path, base64Content, message = 'Upload image') {
+        // First try to get the file to get its SHA (if it exists)
+        const currentFile = await this.getFile(token, owner, repo, path);
+        const sha = currentFile ? currentFile.sha : undefined;
+
+        const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message,
+                content: base64Content,
+                sha
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to upload image');
+        return await response.json();
+    }
 }
 
 export default new GithubSync();

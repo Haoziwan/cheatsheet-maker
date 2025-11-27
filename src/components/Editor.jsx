@@ -11,6 +11,7 @@ import ImageRenderer from './ImageRenderer';
 import Outline from './Outline';
 import LazyKatex from './LazyKatex';
 import imageStorage from '../utils/imageStorage';
+import githubSync from '../utils/githubSync';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
 
@@ -139,11 +140,47 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
 
         if (!editor || !monaco || !files || files.length === 0) return;
 
+        // Check for GitHub connection
+        const token = localStorage.getItem('github_token');
+        const repo = localStorage.getItem('github_repo');
+        const userLogin = localStorage.getItem('github_user');
+        const isConnected = token && repo && userLogin;
+
         for (const file of files) {
             if (file.type.startsWith('image/')) {
                 try {
-                    // 保存图片到IndexedDB
-                    const imageId = await imageStorage.saveImage(file);
+                    let imageReference;
+
+                    if (isConnected) {
+                        try {
+                            // Upload to GitHub
+                            const reader = new FileReader();
+                            const base64Promise = new Promise((resolve, reject) => {
+                                reader.onload = () => {
+                                    const base64 = reader.result.split(',')[1];
+                                    resolve(base64);
+                                };
+                                reader.onerror = reject;
+                                reader.readAsDataURL(file);
+                            });
+
+                            const base64Content = await base64Promise;
+                            const timestamp = Date.now();
+                            // Sanitize filename
+                            const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                            const path = `images/${timestamp}_${safeName}`;
+
+                            const result = await githubSync.uploadImage(token, userLogin, repo, path, base64Content, `Upload image ${file.name}`);
+                            imageReference = result.content.download_url;
+                        } catch (ghError) {
+                            console.error('GitHub upload failed, falling back to local:', ghError);
+                            // Fallback to Local IndexedDB
+                            imageReference = await imageStorage.saveImage(file);
+                        }
+                    } else {
+                        // Save to IndexedDB
+                        imageReference = await imageStorage.saveImage(file);
+                    }
 
                     // 在光标位置插入图片引用
                     const position = editor.getPosition();
@@ -155,7 +192,7 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                     );
 
                     const imageName = file.name || 'image';
-                    const imageMarkdown = `![${imageName}](${imageId})\n`;
+                    const imageMarkdown = `![${imageName}](${imageReference})\n`;
 
                     editor.executeEdits('image-upload', [{
                         range: range,
