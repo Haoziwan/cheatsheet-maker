@@ -2,7 +2,6 @@ import { useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
-import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import { Eye, Edit3, Columns, Download, Maximize, X, Menu } from 'lucide-react';
 import MonacoEditor from '@monaco-editor/react';
@@ -10,6 +9,7 @@ import MermaidDiagram from './MermaidDiagram';
 import FormattingToolbar from './FormattingToolbar';
 import ImageRenderer from './ImageRenderer';
 import Outline from './Outline';
+import LazyKatex from './LazyKatex';
 import imageStorage from '../utils/imageStorage';
 import 'katex/dist/katex.min.css';
 import './Editor.css';
@@ -372,6 +372,39 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                 </code>
             );
         },
+        div: ({ node, className, ...props }) => {
+            if (className === 'math-display') {
+                return <LazyKatex block={true} math={props['data-math']} strategy="visible" />;
+            }
+            return <div className={className} {...props} />;
+        },
+        span: ({ node, className, ...props }) => {
+            if (className === 'math-inline') {
+                return <LazyKatex block={false} math={props['data-math']} strategy="visible" />;
+            }
+            return <span className={className} {...props} />;
+        },
+    }), []);
+
+    const remarkRehypeOptions = useMemo(() => ({
+        handlers: {
+            math: (state, node) => {
+                return {
+                    type: 'element',
+                    tagName: 'div',
+                    properties: { className: 'math-display', 'data-math': node.value },
+                    children: []
+                };
+            },
+            inlineMath: (state, node) => {
+                return {
+                    type: 'element',
+                    tagName: 'span',
+                    properties: { className: 'math-inline', 'data-math': node.value },
+                    children: []
+                };
+            }
+        }
     }), []);
 
     const [isOutlineOpen, setIsOutlineOpen] = useState(false);
@@ -499,7 +532,8 @@ const Editor = forwardRef(({ markdown, setMarkdown, appTheme, currentFile }, ref
                         <div className="markdown-body">
                             <ReactMarkdown
                                 remarkPlugins={[remarkMath, remarkGfm]}
-                                rehypePlugins={[rehypeKatex, rehypeRaw]}
+                                rehypePlugins={[rehypeRaw]}
+                                remarkRehypeOptions={remarkRehypeOptions}
                                 components={components}
                             >
                                 {preprocessedMarkdown}

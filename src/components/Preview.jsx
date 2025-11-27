@@ -2,13 +2,13 @@ import { forwardRef, useEffect, useRef, useMemo, useDeferredValue } from 'react'
 import { ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import MermaidDiagram from './MermaidDiagram';
 import ImageRenderer from './ImageRenderer';
+import LazyKatex from './LazyKatex';
 import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
@@ -438,7 +438,40 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 {...props}
             />
         ),
+        div: ({ node, className, ...props }) => {
+            if (className === 'math-display') {
+                return <LazyKatex block={true} math={props['data-math']} strategy="async" onRender={handleResourceLoad} />;
+            }
+            return <div className={className} {...props} />;
+        },
+        span: ({ node, className, ...props }) => {
+            if (className === 'math-inline') {
+                return <LazyKatex block={false} math={props['data-math']} strategy="async" onRender={handleResourceLoad} />;
+            }
+            return <span className={className} {...props} />;
+        },
     }), [themeStyles]);
+
+    const remarkRehypeOptions = useMemo(() => ({
+        handlers: {
+            math: (state, node) => {
+                return {
+                    type: 'element',
+                    tagName: 'div',
+                    properties: { className: 'math-display', 'data-math': node.value },
+                    children: []
+                };
+            },
+            inlineMath: (state, node) => {
+                return {
+                    type: 'element',
+                    tagName: 'span',
+                    properties: { className: 'math-inline', 'data-math': node.value },
+                    children: []
+                };
+            }
+        }
+    }), []);
 
     return (
         <div className="preview">
@@ -530,7 +563,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 >
                     <ReactMarkdown
                         remarkPlugins={[remarkMath, remarkGfm]}
-                        rehypePlugins={[rehypeKatex, rehypeRaw]}
+                        rehypePlugins={[rehypeRaw]}
+                        remarkRehypeOptions={remarkRehypeOptions}
                         components={components}
                     >
                         {preprocessedMarkdown}
