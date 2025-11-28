@@ -114,7 +114,7 @@ function Toolbar({
                     <input
                         type="number"
                         min="1"
-                        max="6"
+                        max="10"
                         value={columns}
                         onChange={(e) => setColumns(Number(e.target.value))}
                         className="number-input"
@@ -125,8 +125,8 @@ function Toolbar({
                     <label className="label">Font (pt)</label>
                     <input
                         type="number"
-                        min="6"
-                        max="16"
+                        min="2"
+                        max="20"
                         value={fontSize}
                         onChange={(e) => setFontSize(Number(e.target.value))}
                         className="number-input"
@@ -161,7 +161,7 @@ function Toolbar({
                     <label className="label">Line Height</label>
                     <input
                         type="number"
-                        min="0.8"
+                        min="0.1"
                         max="2.5"
                         step="0.1"
                         value={lineHeight}
