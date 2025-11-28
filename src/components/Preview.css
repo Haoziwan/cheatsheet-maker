@@ -327,6 +327,35 @@
         page-break-after: auto;
         break-after: auto;
     }
+
+    /* KaTeX optimization for print */
+    /* Fix thick fraction lines and other horizontal rules in formulas */
+    .katex .frac-line,
+    .katex .mfrac .frac-line,
+    .katex .overline .overline-line,
+    .katex .underline .underline-line,
+    .katex .sqrt>.sqrt-sign,
+    .katex .rule {
+        transform: scaleY(0.5);
+        transform-origin: center;
+    }
+
+    /* Ensure stretchy elements maintain proper thickness */
+    .katex .stretchy {
+        transform: scaleY(0.8);
+    }
+
+    /* Reset box-sizing for better rendering */
+    .katex,
+    .katex * {
+        box-sizing: content-box;
+    }
+
+    /* Ensure math elements don't get clipped */
+    .katex-display,
+    .katex {
+        overflow: visible !important;
+    }
 }
 
 .preview-header-left {
