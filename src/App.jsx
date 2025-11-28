@@ -241,6 +241,45 @@ function App() {
     return () => clearTimeout(timer);
   }, [markdown, currentFile]); // 当markdown或currentFile变化时触发保存
 
+  // 自动保存 toolbar 参数到当前文件
+  useEffect(() => {
+    if (!currentFile) return;
+
+    // 使用防抖避免过于频繁的保存操作
+    const timer = setTimeout(() => {
+      const savedFiles = localStorage.getItem('cheatsheet_files');
+      if (savedFiles) {
+        try {
+          const parsedFiles = JSON.parse(savedFiles);
+          const updatedFiles = parsedFiles.map(f =>
+            f.id === currentFile.id
+              ? {
+                ...f,
+                toolbarSettings: {
+                  columns,
+                  fontSize,
+                  padding,
+                  gap,
+                  lineHeight,
+                  orientation,
+                  theme,
+                  fontFamily
+                },
+                updatedAt: new Date().toISOString()
+              }
+              : f
+          );
+          localStorage.setItem('cheatsheet_files', JSON.stringify(updatedFiles));
+          console.log('Saved toolbar settings for file:', currentFile.name);
+        } catch (e) {
+          console.error('Failed to save toolbar settings:', e);
+        }
+      }
+    }, 500); // 500ms防抖
+
+    return () => clearTimeout(timer);
+  }, [columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, currentFile]); // 当toolbar参数变化时触发保存
+
   // 处理文件切换
   const handleFileChange = (file) => {
     // 先保存当前文件
