@@ -100,7 +100,46 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
 
     const loadImages = async () => {
         try {
-            const allImages = await imageStorage.getAllImages();
+            // 1. 获取本地存储的图片
+            const localImages = await imageStorage.getAllImages();
+
+            // 2. 从所有文件的markdown中提取GitHub图片
+            const githubImages = [];
+            const githubImagePattern = /!\[([^\]]*)\]\((https:\/\/raw\.githubusercontent\.com\/[^)]+)\)/g;
+
+            for (const file of files) {
+                const matches = [...file.content.matchAll(githubImagePattern)];
+                for (const match of matches) {
+                    const [, alt, url] = match;
+                    // 检查是否已经添加过这个URL
+                    if (!githubImages.find(img => img.url === url)) {
+                        // 从URL提取文件名
+                        const fileName = url.split('/').pop() || 'github-image';
+                        githubImages.push({
+                            id: url, // 使用URL作为ID
+                            name: alt || fileName,
+                            url: url,
+                            type: 'github',
+                            timestamp: Date.now(), // 使用当前时间作为占位符
+                            sourceFile: file.name
+                        });
+                    }
+                }
+            }
+
+            // 3. 转换本地图片格式以统一结构
+            const formattedLocalImages = localImages.map(img => ({
+                ...img,
+                type: 'local',
+                url: img.data // 本地图片使用data字段作为URL
+            }));
+
+            // 4. 合并本地图片和GitHub图片
+            const allImages = [...formattedLocalImages, ...githubImages];
+
+            // 5. 按时间排序（最新的在前）
+            allImages.sort((a, b) => b.timestamp - a.timestamp);
+
             setImages(allImages);
         } catch (error) {
             console.error('Failed to load images:', error);
@@ -188,8 +227,10 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
     };
 
     // 复制图片链接
-    const handleCopyLink = (imageId) => {
-        const link = `![image](${imageId})`;
+    const handleCopyLink = (image) => {
+        // GitHub图片直接使用URL，本地图片使用ID
+        const imageRef = image.type === 'github' ? image.url : image.id;
+        const link = `![${image.name || 'image'}](${imageRef})`;
         navigator.clipboard.writeText(link).then(() => {
             alert('Image link copied to clipboard!');
         }).catch(err => {
@@ -200,7 +241,12 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
 
     // 预览图片
     const handlePreviewImage = async (image) => {
-        setPreviewImage(image);
+        // 如果是GitHub图片，预览时需要使用url字段
+        if (image.type === 'github') {
+            setPreviewImage({ ...image, data: image.url });
+        } else {
+            setPreviewImage(image);
+        }
     };
 
     // 关闭预览
@@ -487,11 +533,26 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                         images.map(image => (
                             <div key={image.id} className="file-item">
                                 <div className="file-item-main">
-                                    <Image size={16} className="file-icon" />
+                                    {image.type === 'github' ? (
+                                        <Github size={16} className="file-icon" style={{ color: '#6366f1' }} />
+                                    ) : (
+                                        <Image size={16} className="file-icon" />
+                                    )}
                                     <div className="file-info">
-                                        <div className="file-name">{image.name}</div>
+                                        <div className="file-name">
+                                            {image.name}
+                                            {image.type === 'github' && (
+                                                <span style={{ marginLeft: '8px', fontSize: '10px', color: '#6366f1', fontWeight: 'bold' }}>
+                                                    GitHub
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="file-meta">
-                                            Added: {formatDate(new Date(image.timestamp).toISOString())}
+                                            {image.type === 'github' ? (
+                                                `From: ${image.sourceFile}`
+                                            ) : (
+                                                `Added: ${formatDate(new Date(image.timestamp).toISOString())}`
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -505,18 +566,20 @@ function FilePanel({ isOpen, onClose, currentFile, onFileChange, onNewFile, mark
                                     </button>
                                     <button
                                         className="btn-icon"
-                                        onClick={() => handleCopyLink(image.id)}
+                                        onClick={() => handleCopyLink(image)}
                                         title="Copy Link"
                                     >
                                         <Link size={14} />
                                     </button>
-                                    <button
-                                        className="btn-icon btn-danger"
-                                        onClick={() => handleDeleteImage(image.id)}
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                    {image.type === 'local' && (
+                                        <button
+                                            className="btn-icon btn-danger"
+                                            onClick={() => handleDeleteImage(image.id)}
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))
