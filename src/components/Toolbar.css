@@ -204,3 +204,36 @@
     cursor: pointer;
     transition: all 0.2s;
 }
+
+
+/* Theme editor button styles */
+.label-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.icon-btn-small {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.65rem;
+    height: 0.65rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.2s;
+}
+
+.icon-btn-small:hover {
+    color: var(--color-accent-primary);
+    background-color: var(--color-bg-tertiary);
+}
+
+.icon-btn-small svg {
+    width: 0.6rem;
+    height: 0.6rem;
+}

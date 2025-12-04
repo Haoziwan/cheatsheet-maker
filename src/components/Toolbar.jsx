@@ -1,6 +1,8 @@
-import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw, File, Sun, Moon } from 'lucide-react';
-import themes from '../styles/themes';
+import { Download, Github, RectangleHorizontal, RectangleVertical, RotateCcw, File, Sun, Moon, Settings } from 'lucide-react';
+import { useState } from 'react';
+import defaultThemes from '../styles/themes';
 import fonts from '../styles/fonts';
+import ThemeEditor from './ThemeEditor';
 import './Toolbar.css';
 
 function Toolbar({
@@ -25,12 +27,15 @@ function Toolbar({
     defaultOrientation,
     defaultTheme,
     defaultFontFamily,
-    defaultAppTheme
+    defaultAppTheme,
+    themes,
+    onThemeUpdate
 }) {
+    const [isThemeEditorOpen, setIsThemeEditorOpen] = useState(false);
     const handleExportPDF = () => {
         // Save the original title
         const originalTitle = document.title;
-        
+
         // Set document title to current file name (if available)
         if (currentFile && currentFile.name) {
             // Sanitize filename by removing extension if present
@@ -40,12 +45,12 @@ function Toolbar({
             }
             document.title = fileName;
         }
-        
+
         // Trigger browser print dialog
         // The @media print styles in Preview.css will handle the layout
         // to ensure only the preview pages are printed in A4 landscape
         window.print();
-        
+
         // Restore original title after a short delay
         setTimeout(() => {
             document.title = originalTitle;
@@ -80,13 +85,22 @@ function Toolbar({
 
             <div className="toolbar-center">
                 <div className="toolbar-control">
-                    <label className="label">Theme</label>
+                    <div className="label-with-icon">
+                        <label className="label">Theme</label>
+                        <button
+                            className="icon-btn-small"
+                            onClick={() => setIsThemeEditorOpen(true)}
+                            title="Edit Theme"
+                        >
+                            <Settings size={12} />
+                        </button>
+                    </div>
                     <select
                         value={theme}
                         onChange={(e) => setTheme(e.target.value)}
                         className="select"
                     >
-                        {Object.entries(themes).map(([key, themeData]) => (
+                        {themes && Object.entries(themes).map(([key, themeData]) => (
                             <option key={key} value={key}>
                                 {themeData.name}
                             </option>
@@ -225,6 +239,14 @@ function Toolbar({
                     PDF
                 </button>
             </div>
+            <ThemeEditor
+                isOpen={isThemeEditorOpen}
+                onClose={() => setIsThemeEditorOpen(false)}
+                theme={themes ? themes[theme] : null}
+                themeKey={theme}
+                onSave={onThemeUpdate}
+                originalTheme={defaultThemes[theme]}
+            />
         </div>
     );
 }

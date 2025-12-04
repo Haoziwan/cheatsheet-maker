@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
 import FilePanel from './components/FilePanel';
 import { useLocalStorage } from './utils/useLocalStorage';
+import defaultThemes from './styles/themes';
 import './App.css';
 
 const defaultMarkdown = `# Markdown Cheatsheet
@@ -109,6 +110,7 @@ function App() {
   const [fontFamily, setFontFamily] = useLocalStorage('cheatsheet_fontFamily', 'inter');
   const [appTheme, setAppTheme] = useLocalStorage('cheatsheet_app_theme', 'dark');
   const [splitSize, setSplitSize] = useLocalStorage('cheatsheet_splitSize', 50);
+  const [customThemes, setCustomThemes] = useLocalStorage('cheatsheet_custom_themes', {});
   const [liveUpdate, setLiveUpdate] = useState(true);
   const [isFilePanelOpen, setIsFilePanelOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState(null);
@@ -117,6 +119,22 @@ function App() {
   const previewContainerRef = useRef(null);
   const editorRef = useRef(null);
   const markdownRef = useRef(markdown);
+
+  const allThemes = useMemo(() => ({
+    ...defaultThemes,
+    ...customThemes
+  }), [customThemes]);
+
+  const handleThemeUpdate = (key, newTheme) => {
+    setCustomThemes(prev => ({
+      ...prev,
+      [key]: newTheme
+    }));
+    // If the key is new (custom theme), we might want to switch to it
+    if (key !== theme) {
+      setTheme(key);
+    }
+  };
 
   // 保持 markdownRef 同步
   useEffect(() => {
@@ -384,6 +402,8 @@ function App() {
         defaultFontFamily={defaultValues.fontFamily}
         defaultAppTheme={defaultValues.appTheme}
         currentFile={currentFile} // Pass currentFile to Toolbar
+        themes={allThemes}
+        onThemeUpdate={handleThemeUpdate}
       />
       <FilePanel
         isOpen={isFilePanelOpen}
@@ -456,6 +476,7 @@ function App() {
             setScale={setScale}
             orientation={orientation}
             theme={theme}
+            themes={allThemes}
             fontFamily={fontFamily}
             onLineClick={(line) => editorRef.current?.scrollToLine(line)}
             liveUpdate={liveUpdate}

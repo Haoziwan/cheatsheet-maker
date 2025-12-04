@@ -9,7 +9,6 @@ import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import MermaidDiagram from './MermaidDiagram';
 import ImageRenderer from './ImageRenderer';
 import LazyKatex from './LazyKatex';
-import themes from '../styles/themes';
 import fonts from '../styles/fonts';
 import 'katex/dist/katex.min.css';
 import './Preview.css';
@@ -23,7 +22,7 @@ const preprocessMarkdown = (markdown) => {
 };
 
 
-const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, fontFamily, onLineClick, liveUpdate, setLiveUpdate }, ref) => {
+const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHeight, scale, setScale, orientation, theme, themes, fontFamily, onLineClick, liveUpdate, setLiveUpdate }, ref) => {
     const measureRef = useRef(null);
     const pagesContainerRef = useRef(null);
     const layoutTimeoutRef = useRef(null);
@@ -260,7 +259,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
             page.style.padding = `${safePadding}mm`;
 
             // Apply theme
-            const currentTheme = themes[theme] || themes.classic;
+            const currentTheme = (themes && themes[theme]) || (themes && themes.classic) || {};
             if (currentTheme.cssVars) {
                 Object.entries(currentTheme.cssVars).forEach(([key, value]) => {
                     page.style.setProperty(key, value);
@@ -324,7 +323,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     };
 
     // Custom components to inject source line numbers and apply theme styles
-    const currentTheme = themes[theme] || themes.classic;
+    const currentTheme = (themes && themes[theme]) || (themes && themes.classic) || {};
     const themeStyles = currentTheme.styles || {};
 
     const components = useMemo(() => ({
