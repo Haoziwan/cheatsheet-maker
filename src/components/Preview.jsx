@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useMemo, useDeferredValue } from 'react';
+import { forwardRef, useEffect, useRef, useMemo, useDeferredValue, useCallback, memo } from 'react';
 import { ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -50,7 +50,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
         return mm * pxPerMmRef.current;
     };
 
-    const handlePageClick = (e) => {
+    const handlePageClick = useCallback((e) => {
         if (!onLineClick) return;
         const target = e.target.closest('[data-line]');
         if (target) {
@@ -59,7 +59,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                 onLineClick(line);
             }
         }
-    };
+    }, [onLineClick]);
 
     // Load Google Fonts if needed
     useEffect(() => {
@@ -194,18 +194,26 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
     };
 
     useEffect(() => {
-        updateLayout();
+        const timer = setTimeout(() => {
+            updateLayout();
+        }, 300);
+        return () => clearTimeout(timer);
     }, [deferredMarkdown, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, liveUpdate]);
 
-    const handleResourceLoad = () => {
+    const updateLayoutRef = useRef(updateLayout);
+    useEffect(() => {
+        updateLayoutRef.current = updateLayout;
+    });
+
+    const handleResourceLoad = useCallback(() => {
         // Debounce layout updates from resource loading (images, mermaid)
         if (layoutTimeoutRef.current) {
             clearTimeout(layoutTimeoutRef.current);
         }
         layoutTimeoutRef.current = setTimeout(() => {
-            updateLayout();
+            updateLayoutRef.current();
         }, 100);
-    };
+    }, []);
 
     // 手动更新函数
     const handleManualUpdate = () => {
@@ -576,4 +584,4 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
 
 Preview.displayName = 'Preview';
 
-export default Preview;
+export default memo(Preview);

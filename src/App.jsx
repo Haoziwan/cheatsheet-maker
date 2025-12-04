@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
@@ -82,14 +82,14 @@ Here is a footnote reference[^1].
 
 ## Chart
 
-` + '```mermaid' + `
+\`\`\`mermaid
 pie title Programming Languages Usage
     "JavaScript" : 35
     "Python" : 25
     "Java" : 20
     "C++" : 12
     "Others" : 8
-` + '```' + `
+\`\`\`
 
 ## HTML Support
 <div style="background-color: #e8f4fd; padding: 15px; border-left: 4px solid #2196F3; border-radius: 4px; color: green;">
@@ -212,6 +212,17 @@ function App() {
     }
   }, []);
 
+  // Keep settings ref updated for save operations
+  const settingsRef = useRef({
+    columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily
+  });
+
+  useEffect(() => {
+    settingsRef.current = {
+      columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily
+    };
+  }, [columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily]);
+
   // 保存当前文件到 localStorage (使用 ref 获取最新值)
   const saveCurrentFile = () => {
     if (!currentFile) return;
@@ -220,6 +231,7 @@ function App() {
     if (savedFiles) {
       try {
         const parsedFiles = JSON.parse(savedFiles);
+        const currentSettings = settingsRef.current;
         const updatedFiles = parsedFiles.map(f =>
           f.id === currentFile.id
             ? {
@@ -227,14 +239,7 @@ function App() {
               content: markdownRef.current,
               updatedAt: new Date().toISOString(),
               toolbarSettings: {
-                columns,
-                fontSize,
-                padding,
-                gap,
-                lineHeight,
-                orientation,
-                theme,
-                fontFamily
+                ...currentSettings
               }
             }
             : f
@@ -247,56 +252,17 @@ function App() {
     }
   };
 
-  // 自动保存当前文件
+  // 统一的自动保存 Effect
   useEffect(() => {
     if (!currentFile) return;
 
-    // 使用防抖避免过于频繁的保存操作
+    // 增加防抖时间到 2.5 秒，合并所有保存操作
     const timer = setTimeout(() => {
       saveCurrentFile();
-    }, 1000); // 1秒防抖
+    }, 2500);
 
     return () => clearTimeout(timer);
-  }, [markdown, currentFile]); // 当markdown或currentFile变化时触发保存
-
-  // 自动保存 toolbar 参数到当前文件
-  useEffect(() => {
-    if (!currentFile) return;
-
-    // 使用防抖避免过于频繁的保存操作
-    const timer = setTimeout(() => {
-      const savedFiles = localStorage.getItem('cheatsheet_files');
-      if (savedFiles) {
-        try {
-          const parsedFiles = JSON.parse(savedFiles);
-          const updatedFiles = parsedFiles.map(f =>
-            f.id === currentFile.id
-              ? {
-                ...f,
-                toolbarSettings: {
-                  columns,
-                  fontSize,
-                  padding,
-                  gap,
-                  lineHeight,
-                  orientation,
-                  theme,
-                  fontFamily
-                },
-                updatedAt: new Date().toISOString()
-              }
-              : f
-          );
-          localStorage.setItem('cheatsheet_files', JSON.stringify(updatedFiles));
-          console.log('Saved toolbar settings for file:', currentFile.name);
-        } catch (e) {
-          console.error('Failed to save toolbar settings:', e);
-        }
-      }
-    }, 500); // 500ms防抖
-
-    return () => clearTimeout(timer);
-  }, [columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily, currentFile]); // 当toolbar参数变化时触发保存
+  }, [markdown, currentFile, columns, fontSize, padding, gap, lineHeight, orientation, theme, fontFamily]);
 
   // 处理文件切换
   const handleFileChange = (file) => {
@@ -365,6 +331,10 @@ function App() {
         container.removeEventListener('wheel', handleWheel);
       }
     };
+  }, []);
+
+  const handleLineClick = useCallback((line) => {
+    editorRef.current?.scrollToLine(line);
   }, []);
 
   return (
@@ -478,7 +448,7 @@ function App() {
             theme={theme}
             themes={allThemes}
             fontFamily={fontFamily}
-            onLineClick={(line) => editorRef.current?.scrollToLine(line)}
+            onLineClick={handleLineClick}
             liveUpdate={liveUpdate}
             setLiveUpdate={setLiveUpdate}
           />
