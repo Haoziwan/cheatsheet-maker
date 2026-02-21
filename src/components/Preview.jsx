@@ -373,6 +373,7 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     language={language || 'text'}
                     PreTag="div"
                     className="md-code-block"
+                    wrapLongLines={true}
                     customStyle={{
                         margin: '0.4em 0',
                         padding: '0.6em',
@@ -384,6 +385,8 @@ const Preview = forwardRef(({ markdown, columns, fontSize, padding, gap, lineHei
                     codeTagProps={{
                         style: {
                             fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-all',
                         }
                     }}
                     {...props}

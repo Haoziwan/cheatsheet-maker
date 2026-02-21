@@ -150,10 +150,12 @@
     line-height: 1.4 !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow-x: auto !important;
+    overflow-x: hidden !important;
     overflow-y: hidden !important;
     max-width: 100%;
     word-wrap: break-word;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
 }
 
 .preview-page .md-code-block pre {
@@ -162,6 +164,8 @@
     background: #f8f8f8 !important;
     border: 1px solid #ddd;
     border-radius: 4px;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
 }
 
 .preview-page .md-blockquote {
@@ -174,7 +178,7 @@
 
 .preview-page .md-table {
     border-collapse: collapse;
-    width: auto;
+    width: 100%;
     max-width: 100%;
     margin: 0.4em 0;
     font-size: 0.85em;
@@ -189,18 +193,15 @@
     text-align: left;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    word-break: break-all;
     hyphens: auto;
 }
 
 .preview-page .md-th {
     background: #f0f0f0;
     font-weight: 600;
-    white-space: nowrap;
+    white-space: normal;
     color: inherit;
-}
-
-.preview-page .md-td {
-    max-width: 200px;
 }
 
 .preview-page .md-tr:nth-child(even) {
